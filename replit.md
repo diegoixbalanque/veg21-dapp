@@ -1,0 +1,78 @@
+# VEG21 - Vegan Habit Tracker
+
+## Overview
+
+VEG21 is a blockchain-based web application that gamifies vegan lifestyle adoption through 21-day challenges. Users participate in vegan habit-building challenges, contribute to community causes, and earn cryptocurrency rewards. The platform combines habit tracking, social impact, and decentralized finance to create an engaging ecosystem for promoting veganism and environmental sustainability.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+- **React + TypeScript**: Component-based UI with type safety
+- **Vite**: Fast development server and build tool optimized for modern web development
+- **Wouter**: Lightweight client-side routing solution
+- **Tailwind CSS**: Utility-first CSS framework for rapid UI development
+- **Shadcn/ui**: High-quality React component library built on Radix UI primitives
+- **TanStack Query**: Server state management for API calls and caching
+
+### Backend Architecture
+- **Express.js**: RESTful API server with TypeScript support
+- **Modular Storage Interface**: Abstracted storage layer supporting both in-memory and database implementations
+- **Middleware Pipeline**: Request logging, JSON parsing, and error handling
+- **Development Server**: Hot-reload enabled development environment with Vite integration
+
+### Database Design
+- **Drizzle ORM**: Type-safe database toolkit with PostgreSQL dialect
+- **Schema-First Approach**: Database schema defined in TypeScript with automatic type inference
+- **Migration Support**: Database versioning through Drizzle Kit
+- **User Entity**: Simple user model with username/password authentication
+
+### Styling and UI System
+- **Design System**: Consistent theming with CSS custom properties
+- **Component Variants**: Class Variance Authority for component styling variations
+- **Responsive Design**: Mobile-first approach with Tailwind breakpoints
+- **Custom Color Palette**: Vegan-themed color scheme with gradients
+
+### State Management
+- **React Query**: Server state caching and synchronization
+- **Custom Hooks**: Encapsulated wallet connection and mobile detection logic
+- **Context Pattern**: Shared state for UI components like toasts and modals
+
+### Blockchain Integration
+- **Wallet Connection**: MetaMask integration with fallback simulation
+- **Astar Network**: Target blockchain for token transactions
+- **Token Economy**: Community fund donations and challenge rewards system
+
+## External Dependencies
+
+### Database Services
+- **Neon Database**: Serverless PostgreSQL database provider
+- **Environment Variables**: Database connection via DATABASE_URL
+
+### Blockchain Infrastructure
+- **MetaMask**: Web3 wallet for user authentication and transactions
+- **Astar Network**: Layer 1 blockchain for token operations
+- **Ethers.js**: Ethereum JavaScript library for blockchain interactions
+
+### UI and Styling
+- **Radix UI**: Accessible component primitives for complex UI elements
+- **Lucide React**: Feather-inspired icon library
+- **Google Fonts**: Custom typography with Inter and additional font families
+- **Tailwind CSS**: Utility-first CSS framework
+
+### Development Tools
+- **Replit Integration**: Development environment optimizations and debugging tools
+- **ESBuild**: Fast JavaScript bundler for production builds
+- **PostCSS**: CSS processing with Tailwind and Autoprefixer plugins
+
+### Content and Media
+- **Unsplash**: External image hosting for charity and community content
+- **Font Awesome**: Icon library for social media and branding elements
+
+### Runtime Environment
+- **Node.js**: Server runtime with ES module support
+- **TypeScript**: Type checking and compilation
+- **Vite**: Development server with hot module replacement
