@@ -111,3 +111,10 @@ Este proyecto sirve como hub experimental donde participantes y negocios locales
 - Explorar nuevas dinámicas de consumo, impacto social y gamificación.
 
 - Conectar con otros proyectos y validar ideas en un entorno real y seguro.
+
+
+VIDEO MVP:
+https://www.youtube.com/watch?v=exa3p_RJKLU
+
+VIDEO BUSINESS MODEL
+https://www.youtube.com/watch?v=w-HQ8DC2E9M
