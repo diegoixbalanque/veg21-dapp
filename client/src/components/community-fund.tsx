@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { Coins, Heart, ThumbsUp } from "lucide-react";
+import { Coins, Heart, ThumbsUp, History, DollarSign, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { MessageModal } from "./message-modal";
 import { useWallet } from "@/hooks/use-wallet";
+import { useMockWeb3, useContributions } from "@/hooks/use-mock-web3";
+import { formatTokenAmount, formatTxHash } from "@/lib/mockWeb3";
 
 interface Charity {
   id: number;
@@ -43,11 +48,12 @@ const charities: Charity[] = [
 export function CommunityFund() {
   const [totalDonated, setTotalDonated] = useState(12847);
   const [charityData, setCharityData] = useState(charities);
-  const [userTokenBalance] = useState(450);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [donatingTo, setDonatingTo] = useState<number | null>(null);
   const [votingFor, setVotingFor] = useState<number | null>(null);
+  const [customAmount, setCustomAmount] = useState<string>('50');
+  const [showContributionHistory, setShowContributionHistory] = useState(false);
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     type: 'success' | 'error';
@@ -56,6 +62,8 @@ export function CommunityFund() {
   }>({ isOpen: false, type: 'success', title: '', message: '' });
 
   const { isConnected } = useWallet();
+  const mockWeb3 = useMockWeb3();
+  const { contributions, contribute, totalContributed, isLoading: isContributing } = useContributions();
 
   // Fallback component for loading state
   const LoadingCard = () => (
@@ -112,24 +120,36 @@ export function CommunityFund() {
     setModalState({ isOpen: true, type, title, message });
   };
 
-  const handleDonation = async (charityId: number) => {
+  const handleDonation = async (charityId: number, amount?: number) => {
     if (!isConnected) {
       showMessage('error', 'Wallet Requerida', 'Necesitas conectar tu wallet antes de hacer una donación.');
       return;
     }
 
-    const donationAmount = 50;
-    if (userTokenBalance < donationAmount) {
-      showMessage('error', 'Saldo Insuficiente', 'No tienes suficientes tokens VEG21 para hacer una donación.');
+    if (!mockWeb3.isInitialized) {
+      showMessage('error', 'Web3 No Inicializado', 'Por favor, espera a que se inicialice la conexión Web3.');
+      return;
+    }
+
+    const donationAmount = amount || parseInt(customAmount) || 50;
+    
+    if (isNaN(donationAmount) || donationAmount <= 0) {
+      showMessage('error', 'Monto Inválido', 'Por favor, ingresa un monto válido mayor a 0.');
+      return;
+    }
+
+    if (mockWeb3.balance.veg21 < donationAmount) {
+      showMessage('error', 'Saldo Insuficiente', `No tienes suficientes tokens VEG21. Tu saldo actual es ${formatTokenAmount(mockWeb3.balance.veg21, 0)} VEG21.`);
       return;
     }
 
     setDonatingTo(charityId);
 
     try {
-      // Simulate donation process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
+      // Use mock Web3 service for contribution
+      const transaction = await contribute(charityId.toString(), donationAmount);
+      
+      // Update local charity data
       setTotalDonated(prev => prev + donationAmount);
       setCharityData(prev => prev.map(charity => 
         charity.id === charityId 
@@ -137,9 +157,14 @@ export function CommunityFund() {
           : charity
       ));
 
-      showMessage('success', '¡Donación Exitosa!', `Has donado ${donationAmount} tokens VEG21. ¡Gracias por tu contribución al bienestar animal!`);
-    } catch (error) {
-      showMessage('error', 'Error', 'Hubo un problema al procesar la donación. Intenta de nuevo.');
+      const charity = charityData.find(c => c.id === charityId);
+      showMessage('success', '¡Donación Exitosa!', 
+        `Has donado ${formatTokenAmount(donationAmount, 0)} VEG21 tokens a ${charity?.name}. \n\nTransacción: ${formatTxHash(transaction.txHash)}`);
+      
+      // Reset custom amount
+      setCustomAmount('50');
+    } catch (error: any) {
+      showMessage('error', 'Error en Donación', error.message || 'Hubo un problema al procesar la donación. Intenta de nuevo.');
     } finally {
       setDonatingTo(null);
     }
@@ -182,19 +207,91 @@ export function CommunityFund() {
             </p>
           </div>
 
-          {/* Total donations counter */}
-          <div className="bg-white rounded-2xl p-8 shadow-xl border border-green-100 mb-16 text-center">
-            <h3 className="text-2xl font-bold text-veg-dark mb-4">Total Donado por la Comunidad</h3>
-            <div className="flex items-center justify-center space-x-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-veg-primary to-veg-secondary rounded-full flex items-center justify-center">
-                <Coins className="text-white text-3xl" />
-              </div>
-              <div>
-                <p className="text-5xl font-bold text-veg-primary">{totalDonated.toLocaleString()}</p>
-                <p className="text-lg text-gray-600">Tokens VEG21</p>
+          {/* Total donations and user stats */}
+          <div className="grid lg:grid-cols-2 gap-8 mb-16">
+            {/* Community Total */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl border border-green-100 text-center">
+              <h3 className="text-2xl font-bold text-veg-dark mb-4">Total Donado por la Comunidad</h3>
+              <div className="flex items-center justify-center space-x-4">
+                <div className="w-20 h-20 bg-gradient-to-br from-veg-primary to-veg-secondary rounded-full flex items-center justify-center">
+                  <Coins className="text-white text-3xl" />
+                </div>
+                <div>
+                  <p className="text-5xl font-bold text-veg-primary">{totalDonated.toLocaleString()}</p>
+                  <p className="text-lg text-gray-600">Tokens VEG21</p>
+                </div>
               </div>
             </div>
+            
+            {/* User Contributions */}
+            {isConnected && mockWeb3.isInitialized && (
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-xl border border-blue-100">
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Tus Contribuciones</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Total Contribuido:</span>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-blue-600">{formatTokenAmount(totalContributed, 0)}</p>
+                      <p className="text-sm text-gray-500">VEG21 tokens</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Donaciones realizadas:</span>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      {contributions.length}
+                    </Badge>
+                  </div>
+                  {contributions.length > 0 && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowContributionHistory(!showContributionHistory)}
+                      className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
+                      data-testid="toggle-contribution-history"
+                    >
+                      <History className="w-4 h-4 mr-2" />
+                      {showContributionHistory ? 'Ocultar' : 'Ver'} Historial
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+          
+          {/* Contribution History */}
+          {showContributionHistory && contributions.length > 0 && (
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 mb-8">
+              <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                <History className="w-5 h-5 mr-2" />
+                Historial de Contribuciones
+              </h3>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {contributions.slice().reverse().map((contribution) => {
+                  const charity = charityData.find(c => c.id.toString() === contribution.charityId);
+                  return (
+                    <div key={contribution.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="font-medium text-gray-800">{charity?.name || 'Organización'}</p>
+                        <p className="text-sm text-gray-600">
+                          {contribution.timestamp.toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                        <p className="text-xs text-gray-500">{formatTxHash(contribution.txHash)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-blue-600">{formatTokenAmount(contribution.amount, 0)}</p>
+                        <p className="text-xs text-gray-500">VEG21</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Loading State */}
           {isLoading && (
@@ -243,43 +340,95 @@ export function CommunityFund() {
                   </div>
                 </div>
                 
-                <div className="space-y-3">
-                  <Button 
-                    onClick={() => handleDonation(charity.id)}
-                    disabled={donatingTo === charity.id}
-                    className="w-full bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary transform hover:scale-105 transition-all duration-200 shadow-lg"
-                  >
-                    {donatingTo === charity.id ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        <Heart className="mr-2 h-4 w-4" />
-                        Donar con Tokens
-                      </>
-                    )}
-                  </Button>
+                <div className="space-y-4">
+                  {/* Custom Donation Amount */}
+                  {isConnected && mockWeb3.isInitialized && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <Label htmlFor={`amount-${charity.id}`} className="text-sm font-medium text-gray-700">
+                        Monto de Donación (VEG21)
+                      </Label>
+                      <div className="mt-2 space-y-3">
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input
+                            id={`amount-${charity.id}`}
+                            type="number"
+                            min="1"
+                            max={mockWeb3.balance.veg21}
+                            value={customAmount}
+                            onChange={(e) => setCustomAmount(e.target.value)}
+                            className="pl-10"
+                            placeholder="Ingresa monto"
+                            data-testid={`input-donation-amount-${charity.id}`}
+                          />
+                        </div>
+                        
+                        {/* Quick Amount Buttons */}
+                        <div className="flex space-x-2">
+                          {[25, 50, 100, 200].map((amount) => (
+                            <Button
+                              key={amount}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCustomAmount(amount.toString())}
+                              className="flex-1 text-xs border-gray-300 hover:border-veg-primary hover:text-veg-primary"
+                              disabled={amount > mockWeb3.balance.veg21}
+                            >
+                              {amount}
+                            </Button>
+                          ))}
+                        </div>
+                        
+                        <div className="text-xs text-gray-500 text-center">
+                          Tu saldo: {formatTokenAmount(mockWeb3.balance.veg21, 0)} VEG21
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
-                  <Button 
-                    onClick={() => handleVote(charity.id)}
-                    disabled={votingFor === charity.id}
-                    variant="outline"
-                    className="w-full border-veg-primary text-veg-primary hover:bg-veg-primary hover:text-white transition-all duration-200"
-                  >
-                    {votingFor === charity.id ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-veg-primary mr-2"></div>
-                        Votando...
-                      </>
-                    ) : (
-                      <>
-                        <ThumbsUp className="mr-2 h-4 w-4" />
-                        Votar Confianza
-                      </>
-                    )}
-                  </Button>
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={() => handleDonation(charity.id)}
+                      disabled={donatingTo === charity.id || isContributing || !isConnected || !mockWeb3.isInitialized}
+                      className="w-full bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary transform hover:scale-105 transition-all duration-200 shadow-lg"
+                      data-testid={`button-donate-${charity.id}`}
+                    >
+                      {donatingTo === charity.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          Procesando...
+                        </>
+                      ) : (
+                        <>
+                          <Heart className="mr-2 h-4 w-4" />
+                          {isConnected && mockWeb3.isInitialized 
+                            ? `Donar ${customAmount || '50'} VEG21`
+                            : 'Conectar para Donar'
+                          }
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => handleVote(charity.id)}
+                      disabled={votingFor === charity.id || !isConnected}
+                      variant="outline"
+                      className="w-full border-veg-primary text-veg-primary hover:bg-veg-primary hover:text-white transition-all duration-200"
+                      data-testid={`button-vote-${charity.id}`}
+                    >
+                      {votingFor === charity.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          Votando...
+                        </>
+                      ) : (
+                        <>
+                          <ThumbsUp className="mr-2 h-4 w-4" />
+                          Votar Confianza
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 </div>
               ))}
