@@ -97,7 +97,7 @@ export function ActiveChallenges() {
       // Simulate joining challenge
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      setJoinedChallenges(prev => new Set([...prev, challenge.id]));
+      setJoinedChallenges(prev => new Set([...Array.from(prev), challenge.id]));
       showMessage('success', '¡Te has unido al reto!', 'Ahora formas parte del desafío. ¡Completa tus objetivos diarios para ganar tokens VEG21!');
     } catch (error) {
       showMessage('error', 'Error', 'Hubo un problema al unirse al reto. Intenta de nuevo.');
@@ -165,16 +165,16 @@ export function ActiveChallenges() {
 
   return (
     <>
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white" data-testid="active-challenges-section">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-veg-dark mb-4">Retos Activos</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Participa en desafíos veganos de 21 días y gana tokens VEG21 por completar objetivos diarios.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {challenges.map((challenge) => {
               const IconComponent = challenge.icon;
               const isJoined = joinedChallenges.has(challenge.id);

@@ -2,7 +2,7 @@ import { Users, Leaf } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+    <section className="relative py-16 px-4 sm:px-6 lg:px-8">
       <div className="absolute inset-0 bg-gradient-to-r from-green-900/20 to-emerald-900/20"></div>
       <div className="relative max-w-7xl mx-auto text-center">
         <div className="animate-fade-in">
@@ -15,7 +15,7 @@ export function HeroSection() {
             Únete a la revolución verde en blockchain. Construye hábitos veganos sostenibles mientras contribuyes al bienestar animal y ganas recompensas en tokens.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-green-100">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-veg-accent/20 rounded-full flex items-center justify-center">

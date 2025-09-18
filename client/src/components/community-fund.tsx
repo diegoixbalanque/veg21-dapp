@@ -120,9 +120,9 @@ export function CommunityFund() {
 
   return (
     <>
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-veg-light to-green-50">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-veg-light to-green-50" data-testid="community-fund-section">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-veg-dark mb-4">Fondo Comunitario VEG21</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Dona tokens VEG21 a organizaciones de protección animal verificadas. Tu contribución crea un impacto real y transparente.
@@ -130,7 +130,7 @@ export function CommunityFund() {
           </div>
 
           {/* Total donations counter */}
-          <div className="bg-white rounded-2xl p-8 shadow-xl border border-green-100 mb-12 text-center">
+          <div className="bg-white rounded-2xl p-8 shadow-xl border border-green-100 mb-16 text-center">
             <h3 className="text-2xl font-bold text-veg-dark mb-4">Total Donado por la Comunidad</h3>
             <div className="flex items-center justify-center space-x-4">
               <div className="w-20 h-20 bg-gradient-to-br from-veg-primary to-veg-secondary rounded-full flex items-center justify-center">
@@ -143,7 +143,7 @@ export function CommunityFund() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {charityData.map((charity) => (
               <div key={charity.id} className="bg-white rounded-2xl p-8 shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300">
                 <img 
