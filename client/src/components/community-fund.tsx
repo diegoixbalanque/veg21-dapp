@@ -44,6 +44,8 @@ export function CommunityFund() {
   const [totalDonated, setTotalDonated] = useState(12847);
   const [charityData, setCharityData] = useState(charities);
   const [userTokenBalance] = useState(450);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [donatingTo, setDonatingTo] = useState<number | null>(null);
   const [votingFor, setVotingFor] = useState<number | null>(null);
   const [modalState, setModalState] = useState<{
@@ -54,6 +56,57 @@ export function CommunityFund() {
   }>({ isOpen: false, type: 'success', title: '', message: '' });
 
   const { isConnected } = useWallet();
+
+  // Fallback component for loading state
+  const LoadingCard = () => (
+    <div className="bg-white rounded-2xl p-8 shadow-lg border border-green-100">
+      <div className="animate-pulse space-y-4">
+        <div className="w-full h-48 bg-gray-200 rounded-xl"></div>
+        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+        </div>
+        <div className="space-y-3">
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Fallback component for error state
+  const ErrorState = () => (
+    <div className="text-center py-12">
+      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Heart className="w-8 h-8 text-red-500" />
+      </div>
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">Error al cargar las organizaciones</h3>
+      <p className="text-gray-600 mb-6">No pudimos cargar la información de las organizaciones benéficas. Por favor, intenta de nuevo.</p>
+      <Button
+        onClick={() => {
+          setHasError(false);
+          setIsLoading(true);
+          // Simulate retry
+          setTimeout(() => setIsLoading(false), 1000);
+        }}
+        className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary"
+      >
+        Intentar de Nuevo
+      </Button>
+    </div>
+  );
+
+  // Fallback for empty state
+  const EmptyState = () => (
+    <div className="text-center py-12">
+      <div className="w-16 h-16 bg-veg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Heart className="w-8 h-8 text-veg-accent" />
+      </div>
+      <h3 className="text-xl font-semibold text-veg-dark mb-2">Próximamente nuevas organizaciones</h3>
+      <p className="text-gray-600">Estamos trabajando para agregar más organizaciones benéficas verificadas. ¡Vuelve pronto!</p>
+    </div>
+  );
 
   const showMessage = (type: 'success' | 'error', title: string, message: string) => {
     setModalState({ isOpen: true, type, title, message });
@@ -143,8 +196,25 @@ export function CommunityFund() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {charityData.map((charity) => (
+          {/* Loading State */}
+          {isLoading && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              <LoadingCard />
+              <LoadingCard />
+              <LoadingCard />
+            </div>
+          )}
+
+          {/* Error State */}
+          {hasError && !isLoading && <ErrorState />}
+
+          {/* Empty State */}
+          {!isLoading && !hasError && charityData.length === 0 && <EmptyState />}
+
+          {/* Normal Data Display */}
+          {!isLoading && !hasError && charityData.length > 0 && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {charityData.map((charity) => (
               <div key={charity.id} className="bg-white rounded-2xl p-8 shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300">
                 <img 
                   src={charity.image} 
@@ -211,9 +281,10 @@ export function CommunityFund() {
                     )}
                   </Button>
                 </div>
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -1,4 +1,5 @@
-import { Trophy, Droplets, Leaf, Heart, Share2, UserPlus, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Trophy, Droplets, Leaf, Heart, Share2, UserPlus, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface LeaderboardUser {
@@ -17,12 +18,66 @@ const leaderboard: LeaderboardUser[] = [
 ];
 
 export function VeganImpactRanking() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>(leaderboard);
+
   const getRankIcon = (rank: number) => {
     if (rank === 1) return "bg-gradient-to-br from-veg-primary to-veg-secondary";
     if (rank === 2) return "bg-gradient-to-br from-gray-400 to-gray-500";
     if (rank === 3) return "bg-gradient-to-br from-amber-400 to-amber-500";
     return "bg-gradient-to-br from-veg-secondary to-green-600";
   };
+
+  // Loading skeleton for leaderboard
+  const LoadingRow = () => (
+    <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-green-100">
+      <div className="flex items-center space-x-4">
+        <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+          <div className="h-3 bg-gray-200 rounded w-32 animate-pulse"></div>
+        </div>
+      </div>
+      <div className="text-right space-y-1">
+        <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+        <div className="h-3 bg-gray-200 rounded w-20 animate-pulse"></div>
+      </div>
+    </div>
+  );
+
+  // Error state for leaderboard
+  const ErrorState = () => (
+    <div className="text-center py-12">
+      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <AlertCircle className="w-8 h-8 text-red-500" />
+      </div>
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">Error al cargar el ranking</h3>
+      <p className="text-gray-600 mb-6">No pudimos cargar la información del ranking. Por favor, intenta de nuevo.</p>
+      <Button
+        onClick={() => {
+          setHasError(false);
+          setIsLoading(true);
+          setTimeout(() => setIsLoading(false), 1000);
+        }}
+        className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary"
+      >
+        <RefreshCw className="mr-2 h-4 w-4" />
+        Intentar de Nuevo
+      </Button>
+    </div>
+  );
+
+  // Empty state for leaderboard
+  const EmptyState = () => (
+    <div className="text-center py-12">
+      <div className="w-16 h-16 bg-veg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Trophy className="w-8 h-8 text-veg-accent" />
+      </div>
+      <h3 className="text-xl font-semibold text-veg-dark mb-2">¡Sé el primero en el ranking!</h3>
+      <p className="text-gray-600">El ranking está vacío. ¡Únete a un desafío y comienza a ganar puntos de impacto!</p>
+    </div>
+  );
 
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white" data-testid="vegan-impact-ranking-section">
@@ -44,7 +99,25 @@ export function VeganImpactRanking() {
               </h3>
               
               <div className="space-y-4">
-                {leaderboard.map((user) => (
+                {/* Loading State */}
+                {isLoading && (
+                  <>
+                    <LoadingRow />
+                    <LoadingRow />
+                    <LoadingRow />
+                    <LoadingRow />
+                    <LoadingRow />
+                  </>
+                )}
+
+                {/* Error State */}
+                {hasError && !isLoading && <ErrorState />}
+
+                {/* Empty State */}
+                {!isLoading && !hasError && leaderboardData.length === 0 && <EmptyState />}
+
+                {/* Normal Data Display */}
+                {!isLoading && !hasError && leaderboardData.length > 0 && leaderboardData.map((user: LeaderboardUser) => (
                   <div key={user.rank} className="flex items-center justify-between p-4 bg-white rounded-xl border border-green-100 hover:shadow-md transition-all duration-200">
                     <div className="flex items-center space-x-4">
                       <div className={`w-10 h-10 ${getRankIcon(user.rank)} rounded-full flex items-center justify-center text-white font-bold`}>
