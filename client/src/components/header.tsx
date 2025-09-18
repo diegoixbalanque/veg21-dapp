@@ -1,10 +1,11 @@
-import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink } from "lucide-react";
+import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/hooks/use-wallet";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { formatTokenAmount } from "@/lib/mockWeb3";
 
 export function Header() {
-  const { isConnected, isConnecting, connectWallet, disconnectWallet, formattedAddress, error, retryConnection, clearError } = useWallet();
+  const { isConnected, isConnecting, connectWallet, disconnectWallet, formattedAddress, error, retryConnection, clearError, mockWeb3 } = useWallet();
 
   const handleWalletClick = async () => {
     if (isConnected) {
@@ -43,6 +44,21 @@ export function Header() {
                 <div className="flex items-center space-x-2 bg-green-50 px-3 py-1 rounded-full">
                   <div className="w-2 h-2 bg-veg-primary rounded-full animate-pulse"></div>
                   <span className="text-sm text-veg-secondary font-medium">Astar Network</span>
+                </div>
+              )}
+              
+              {/* Token Balance Display */}
+              {isConnected && mockWeb3.isInitialized && (
+                <div className="flex items-center space-x-3 bg-gradient-to-r from-veg-primary/5 to-veg-secondary/5 px-4 py-2 rounded-xl border border-veg-primary/20">
+                  <Coins className="w-4 h-4 text-veg-primary" />
+                  <div className="text-right">
+                    <div className="text-sm font-semibold text-veg-dark">
+                      {formatTokenAmount(mockWeb3.balance.veg21, 0)} VEG21
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {formatTokenAmount(mockWeb3.balance.astr, 3)} ASTR
+                    </div>
+                  </div>
                 </div>
               )}
               

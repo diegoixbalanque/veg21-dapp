@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ethersService } from '@/lib/ethers';
 import { useToast } from '@/hooks/use-toast';
+import { useMockWeb3 } from '@/hooks/use-mock-web3';
 
 export interface WalletError {
   code: string;
@@ -17,6 +18,7 @@ export interface WalletState {
 
 export function useWallet() {
   const { toast } = useToast();
+  const mockWeb3 = useMockWeb3();
   const [walletState, setWalletState] = useState<WalletState>({
     isConnected: false,
     address: null,
@@ -115,6 +117,14 @@ export function useWallet() {
         isConnecting: false,
         error: null,
       });
+      
+      // Initialize mock Web3 service for the connected wallet
+      try {
+        await mockWeb3.initialize(address);
+      } catch (mockWeb3Error) {
+        console.warn('Failed to initialize mock Web3:', mockWeb3Error);
+        // Don't fail wallet connection if mock Web3 fails
+      }
 
       return address;
     } catch (error: any) {
@@ -170,5 +180,7 @@ export function useWallet() {
     retryConnection,
     clearError,
     formattedAddress: walletState.address ? ethersService.formatAddress(walletState.address) : null,
+    // Expose mock Web3 functionality
+    mockWeb3,
   };
 }
