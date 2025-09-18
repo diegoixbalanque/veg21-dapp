@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Trophy, Utensils, Heart, Plus, Check, Clock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MessageModal } from "./message-modal";
+import { ChallengeProgressTracker } from "./challenge-progress-tracker";
 import { useWallet } from "@/hooks/use-wallet";
 
 interface Challenge {
@@ -62,6 +63,7 @@ const challenges: Challenge[] = [
 export function ActiveChallenges() {
   const [joinedChallenges, setJoinedChallenges] = useState<Set<number>>(new Set());
   const [joiningChallenge, setJoiningChallenge] = useState<number | null>(null);
+  const [challengeProgress, setChallengeProgress] = useState<Record<number, number>>({});
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     type: 'success' | 'error';
@@ -98,6 +100,7 @@ export function ActiveChallenges() {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       setJoinedChallenges(prev => new Set([...Array.from(prev), challenge.id]));
+      setChallengeProgress(prev => ({ ...prev, [challenge.id]: 1 }));
       showMessage('success', '¡Te has unido al reto!', 'Ahora formas parte del desafío. ¡Completa tus objetivos diarios para ganar tokens VEG21!');
     } catch (error) {
       showMessage('error', 'Error', 'Hubo un problema al unirse al reto. Intenta de nuevo.');
@@ -173,6 +176,30 @@ export function ActiveChallenges() {
               Participa en desafíos veganos de 21 días y gana tokens VEG21 por completar objetivos diarios.
             </p>
           </div>
+
+          {/* Progress Trackers for Joined Challenges */}
+          {Array.from(joinedChallenges).length > 0 && (
+            <div className="mb-12">
+              <h3 className="text-2xl font-bold text-veg-dark mb-6 text-center">Mis Retos Activos</h3>
+              <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-6">
+                {Array.from(joinedChallenges).map((challengeId) => {
+                  const challenge = challenges.find(c => c.id === challengeId);
+                  if (!challenge) return null;
+                  
+                  return (
+                    <ChallengeProgressTracker
+                      key={challengeId}
+                      challengeId={challengeId}
+                      challengeName={challenge.title}
+                      currentDay={challengeProgress[challengeId] || 1}
+                      totalDays={21}
+                      isActive={true}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {challenges.map((challenge) => {
