@@ -1,11 +1,23 @@
-import { useState } from "react";
-import { CheckCircle, Circle, Calendar, Target, Flame } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle, Circle, Calendar, Target, Flame, Gift, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMockWeb3 } from "@/hooks/use-mock-web3";
+import { Badge } from "@/components/ui/badge";
+import { formatTokenAmount } from "@/lib/mockWeb3";
 
 interface DayStatus {
   day: number;
   status: 'completed' | 'current' | 'upcoming';
   task?: string;
+}
+
+interface Milestone {
+  day: number;
+  rewardId: string;
+  amount: number;
+  description: string;
+  unlocked: boolean;
+  claimed: boolean;
 }
 
 interface ChallengeProgressTrackerProps {
@@ -26,6 +38,89 @@ export function ChallengeProgressTracker({
   onStartChallenge
 }: ChallengeProgressTrackerProps) {
   const [expandedView, setExpandedView] = useState(false);
+  const [claimingReward, setClaimingReward] = useState<string | null>(null);
+  const mockWeb3 = useMockWeb3();
+  
+  // Define reward milestones
+  const milestones: Milestone[] = [
+    {
+      day: 1,
+      rewardId: 'day_1_bonus',
+      amount: 50,
+      description: 'Premio por tu primer día vegano',
+      unlocked: false,
+      claimed: false
+    },
+    {
+      day: 7,
+      rewardId: 'week_1_milestone',
+      amount: 100,
+      description: 'Completaste tu primera semana vegana',
+      unlocked: false,
+      claimed: false
+    },
+    {
+      day: 14,
+      rewardId: 'week_2_milestone',
+      amount: 150,
+      description: 'Dos semanas de compromiso vegano',
+      unlocked: false,
+      claimed: false
+    },
+    {
+      day: 21,
+      rewardId: 'challenge_complete',
+      amount: 300,
+      description: '¡Completaste el desafío de 21 días!',
+      unlocked: false,
+      claimed: false
+    }
+  ];
+  
+  // Update milestone status based on progress and Web3 rewards
+  const getUpdatedMilestones = (): Milestone[] => {
+    return milestones.map(milestone => {
+      const web3Reward = mockWeb3.rewards.find(r => r.id === milestone.rewardId);
+      return {
+        ...milestone,
+        unlocked: isActive && currentDay >= milestone.day,
+        claimed: web3Reward?.claimed || false
+      };
+    });
+  };
+  
+  const [currentMilestones, setCurrentMilestones] = useState<Milestone[]>(getUpdatedMilestones());
+  
+  // Update milestones when progress changes
+  useEffect(() => {
+    const updatedMilestones = getUpdatedMilestones();
+    setCurrentMilestones(updatedMilestones);
+    
+    // Unlock rewards in Web3 service when milestones are reached
+    updatedMilestones.forEach(milestone => {
+      if (milestone.unlocked && !milestone.claimed) {
+        mockWeb3.unlockReward(milestone.rewardId);
+      }
+    });
+  }, [currentDay, isActive, mockWeb3.rewards]);
+  
+  // Handle reward claiming
+  const handleClaimReward = async (rewardId: string) => {
+    setClaimingReward(rewardId);
+    try {
+      await mockWeb3.claimReward(rewardId);
+      // Update local state
+      setCurrentMilestones(prev => 
+        prev.map(m => 
+          m.rewardId === rewardId ? { ...m, claimed: true } : m
+        )
+      );
+    } catch (error) {
+      console.error('Failed to claim reward:', error);
+    } finally {
+      setClaimingReward(null);
+    }
+  };
 
   // Generate daily tasks for the 21-day challenge
   const dailyTasks: string[] = [
@@ -166,10 +261,63 @@ export function ChallengeProgressTracker({
                 <div className="w-8 h-8 bg-veg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
                   {currentDay}
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="font-semibold text-veg-dark">Día {currentDay} - ¡Hoy!</p>
                   <p className="text-sm text-gray-600">{dailyTasks[currentDay - 1]}</p>
                 </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Milestone Rewards */}
+          {currentMilestones.some(m => m.unlocked) && (
+            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 mb-4 border border-yellow-200">
+              <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                <Gift className="w-5 h-5 text-yellow-600 mr-2" />
+                Recompensas de Hitos
+              </h4>
+              <div className="space-y-3">
+                {currentMilestones
+                  .filter(milestone => milestone.unlocked)
+                  .map((milestone) => (
+                    <div key={milestone.rewardId} className="flex items-center justify-between p-3 bg-white rounded-lg border border-yellow-100">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                          <Star className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800">Día {milestone.day} Completado</p>
+                          <p className="text-sm text-gray-600">{milestone.description}</p>
+                          <Badge variant="secondary" className="mt-1">
+                            {formatTokenAmount(milestone.amount, 0)} VEG21 tokens
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        {milestone.claimed ? (
+                          <Badge variant="default" className="bg-green-100 text-green-800">
+                            ✓ Reclamado
+                          </Badge>
+                        ) : (
+                          <Button
+                            onClick={() => handleClaimReward(milestone.rewardId)}
+                            disabled={claimingReward === milestone.rewardId || !mockWeb3.isInitialized}
+                            className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600"
+                            size="sm"
+                            data-testid={`claim-reward-${milestone.rewardId}`}
+                          >
+                            {claimingReward === milestone.rewardId ? (
+                              <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                            ) : (
+                              <Gift className="w-4 h-4 mr-1" />
+                            )}
+                            {claimingReward === milestone.rewardId ? 'Reclamando...' : 'Reclamar'}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                }
               </div>
             </div>
           )}
@@ -177,38 +325,70 @@ export function ChallengeProgressTracker({
           {/* Compact Progress View */}
           {!expandedView && (
             <div className="grid grid-cols-7 gap-2 mb-4">
-              {daysData.slice(0, 14).map((day) => (
-                <div
-                  key={day.day}
-                  className={`w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-semibold transition-all duration-200 ${getStatusStyle(day.status)}`}
-                  title={`Día ${day.day}: ${day.task}`}
-                >
-                  {day.status === 'completed' ? '✓' : day.day}
-                </div>
-              ))}
+              {daysData.slice(0, 14).map((day) => {
+                const isMilestone = currentMilestones.some(m => m.day === day.day);
+                const milestoneData = currentMilestones.find(m => m.day === day.day);
+                
+                return (
+                  <div
+                    key={day.day}
+                    className={`w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-semibold transition-all duration-200 relative ${
+                      getStatusStyle(day.status)
+                    } ${isMilestone ? 'ring-2 ring-yellow-400' : ''}`}
+                    title={`Día ${day.day}: ${day.task}${isMilestone ? ` - Hito: ${milestoneData?.amount} VEG21` : ''}`}
+                  >
+                    {day.status === 'completed' ? '✓' : day.day}
+                    {isMilestone && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full flex items-center justify-center">
+                        <Star className="w-2 h-2 text-white" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
           {/* Expanded Progress View */}
           {expandedView && (
             <div className="space-y-2 mb-4 max-h-64 overflow-y-auto">
-              {daysData.map((day) => (
-                <div
-                  key={day.day}
-                  className={`flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200 ${getStatusStyle(day.status)}`}
-                >
-                  {getStatusIcon(day.status)}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Día {day.day}</span>
-                      {day.status === 'current' && (
-                        <span className="text-xs bg-veg-primary text-white px-2 py-1 rounded-full">¡AHORA!</span>
+              {daysData.map((day) => {
+                const isMilestone = currentMilestones.some(m => m.day === day.day);
+                const milestoneData = currentMilestones.find(m => m.day === day.day);
+                
+                return (
+                  <div
+                    key={day.day}
+                    className={`flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200 ${
+                      getStatusStyle(day.status)
+                    } ${isMilestone ? 'ring-1 ring-yellow-400' : ''}`}
+                  >
+                    {getStatusIcon(day.status)}
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">Día {day.day}</span>
+                          {isMilestone && (
+                            <Badge variant="outline" className="text-xs border-yellow-400 text-yellow-700">
+                              <Star className="w-3 h-3 mr-1" />
+                              Hito
+                            </Badge>
+                          )}
+                        </div>
+                        {day.status === 'current' && (
+                          <span className="text-xs bg-veg-primary text-white px-2 py-1 rounded-full">¡AHORA!</span>
+                        )}
+                      </div>
+                      <p className="text-sm opacity-80">{day.task}</p>
+                      {isMilestone && milestoneData && (
+                        <p className="text-xs text-yellow-700 mt-1">
+                          Recompensa: {formatTokenAmount(milestoneData.amount, 0)} VEG21 tokens
+                        </p>
                       )}
                     </div>
-                    <p className="text-sm opacity-80">{day.task}</p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
