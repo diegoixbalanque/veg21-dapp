@@ -4,6 +4,8 @@
 
 VEG21 is a blockchain-based web application that gamifies vegan lifestyle adoption through 21-day challenges. Users participate in vegan habit-building challenges, contribute to community causes, and earn cryptocurrency rewards. The platform combines habit tracking, social impact, and decentralized finance to create an engaging ecosystem for promoting veganism and environmental sustainability.
 
+**Sprint 5 Completed** (September 2025): Global Impact Leaderboard feature implemented with user ranking system, community impact metrics, navigation integration, and localStorage persistence.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -35,6 +37,14 @@ Preferred communication style: Simple, everyday language.
 - **Component Variants**: Class Variance Authority for component styling variations
 - **Responsive Design**: Mobile-first approach with Tailwind breakpoints
 - **Custom Color Palette**: Vegan-themed color scheme with gradients
+
+### Leaderboard System (Sprint 5)
+- **Global Impact Ranking**: User ranking system based on total VEG21 tokens earned, donations contributed, and staking rewards
+- **Community Impact Metrics**: Dashboard displaying total tokens distributed, donated, staked, and active users
+- **Visual Recognition System**: Crown/medal icons for top 3 performers, special "Tú" badge for current user
+- **Data Integration**: Combines real user statistics from mockWeb3 with mock user data for realistic leaderboard experience
+- **Navigation System**: Integrated header navigation with active state highlighting
+- **Data Persistence**: localStorage integration for maintaining leaderboard state across sessions
 
 ### State Management
 - **React Query**: Server state caching and synchronization
