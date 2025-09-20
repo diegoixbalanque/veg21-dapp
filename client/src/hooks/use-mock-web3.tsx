@@ -83,6 +83,36 @@ export function useMockWeb3(): UseMockWeb3Return {
           totalStakingRewards: serviceState.totalStakingRewards,
           error: null
         }));
+      } else if (currentServiceMode === ServiceMode.HYBRID) {
+        // Hybrid mode: Use mock service for shared state but individual contract calls for specific modules
+        const serviceState = mockWeb3Service.getState();
+        
+        // Get real staking data if using real staking contracts
+        let totalStaked = serviceState.totalStaked;
+        let totalStakingRewards = serviceState.totalStakingRewards;
+        
+        try {
+          if (contractService.isInitialized()) {
+            totalStaked = await contractService.staking.getTotalStaked();
+            totalStakingRewards = await contractService.staking.getTotalStakingRewards();
+          }
+        } catch (stakingError) {
+          console.warn('Failed to get real staking data, using mock:', stakingError);
+        }
+        
+        setState(prev => ({
+          ...prev,
+          isInitialized: serviceState.isInitialized,
+          balance: serviceState.balance,
+          rewards: serviceState.rewards,
+          claimableRewards: mockWeb3Service.getClaimableRewards(),
+          contributions: serviceState.contributions,
+          totalEarned: serviceState.totalEarned,
+          totalContributed: serviceState.totalContributed,
+          totalStaked: totalStaked,
+          totalStakingRewards: totalStakingRewards,
+          error: null
+        }));
       } else {
         // Use contract service for real blockchain interaction
         const contractState = await contractService.getState();

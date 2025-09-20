@@ -22,7 +22,10 @@ import {
   Star,
   Award,
   CheckCircle,
-  Clock
+  Clock,
+  Wallet,
+  Plus,
+  Minus
 } from "lucide-react";
 import { formatTokenAmount } from "@/lib/mockWeb3";
 
@@ -48,6 +51,9 @@ export default function Profile() {
   const [tempUsername, setTempUsername] = useState<string>('');
   const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
   const [challengeProgress, setChallengeProgress] = useState<ChallengeProgressData | null>(null);
+  const [stakeAmount, setStakeAmount] = useState('');
+  const [isStaking, setIsStaking] = useState(false);
+  const [showStakingDetails, setShowStakingDetails] = useState(false);
 
   // Load user data on component mount
   useEffect(() => {
@@ -173,6 +179,22 @@ export default function Profile() {
     const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
     const colorIndex = parseInt(address.slice(-1), 16) % colors.length;
     return colors[colorIndex];
+  };
+
+  const handleStakeTokens = async () => {
+    if (!stakeAmount || parseFloat(stakeAmount) <= 0) return;
+    
+    setIsStaking(true);
+    try {
+      await mockWeb3.stakeTokens(parseFloat(stakeAmount));
+      setStakeAmount('');
+      // Refresh user data to show updated stats
+      loadUserData();
+    } catch (error: any) {
+      console.error('Failed to stake tokens:', error);
+    } finally {
+      setIsStaking(false);
+    }
   };
 
   const userStats = getUserStats();
@@ -402,6 +424,121 @@ export default function Profile() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Staking Section */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm" data-testid="card-staking-section">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Wallet className="w-5 h-5 text-purple-600" />
+                  <span>Gestión de Staking</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowStakingDetails(!showStakingDetails)}
+                  data-testid="button-toggle-staking-details"
+                >
+                  {showStakingDetails ? 'Ocultar' : 'Mostrar'} Detalles
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Apuesta tus tokens VEG21 para ganar recompensas (3.65% APY)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Staking Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600">Tokens Disponibles</div>
+                  <div className="text-2xl font-bold text-purple-600" data-testid="text-available-balance">
+                    {formatTokenAmount(mockWeb3.balance.veg21, 0)}
+                  </div>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600">En Staking</div>
+                  <div className="text-2xl font-bold text-blue-600" data-testid="text-staked-amount">
+                    {formatTokenAmount(userStats.tokensStaked, 0)}
+                  </div>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600">APY</div>
+                  <div className="text-2xl font-bold text-green-600">3.65%</div>
+                </div>
+              </div>
+
+              {/* Staking Actions */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="number"
+                    placeholder="Cantidad a apostar"
+                    value={stakeAmount}
+                    onChange={(e) => setStakeAmount(e.target.value)}
+                    className="flex-1"
+                    min="0"
+                    step="0.01"
+                    data-testid="input-stake-amount"
+                  />
+                  <Button
+                    onClick={handleStakeTokens}
+                    disabled={!stakeAmount || parseFloat(stakeAmount) <= 0 || isStaking || !mockWeb3.isInitialized}
+                    className="bg-purple-600 hover:bg-purple-700"
+                    data-testid="button-stake-tokens"
+                  >
+                    {isStaking ? (
+                      <>
+                        <Clock className="w-4 h-4 mr-2 animate-spin" />
+                        Apostando...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Apostar
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {mockWeb3.balance.veg21 <= 0 && (
+                  <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
+                    No tienes tokens VEG21 disponibles para apostar. Completa desafíos para ganar tokens.
+                  </div>
+                )}
+              </div>
+
+              {/* Staking Details */}
+              {showStakingDetails && (
+                <div className="border-t pt-6 space-y-4">
+                  <h4 className="font-semibold text-gray-900">Información sobre Staking</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Modo Actual:</span>
+                      <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                        HYBRID (Staking Real)
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Red:</span>
+                      <span className="ml-2">Astar Shibuya Testnet</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Recompensas:</span>
+                      <span className="ml-2">3.65% APY (1% diario)</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Retiros:</span>
+                      <span className="ml-2">Disponible en cualquier momento</span>
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    En modo HYBRID, el staking utiliza contratos inteligentes reales en la testnet de Astar Shibuya,
+                    mientras que otras funciones permanecen en modo simulado.
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Empty State for New Users */}
           {!currentChallenge && (
