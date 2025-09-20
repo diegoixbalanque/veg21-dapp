@@ -1,0 +1,45 @@
+You are continuing development of the VEG21 vegan challenge dApp.  
+Context: The dApp already has onboarding, wallet connect (mock), profile, challenges, staking, donations, leaderboard, and a social community feed.  
+Previous sprints established a mock Web3 layer (`mockWeb3.ts`) for balances, staking, donations, and reward claims.  
+
+🎯 Sprint 8 Goal:
+Prepare the project for eventual real blockchain deployment by introducing a **Smart Contract Integration Layer**. The aim is to bridge the current mock system with a Solidity (or ink!/Polkadot) ready design, without breaking existing features.
+
+---
+
+🔹 Tasks:
+1. **Smart Contract Interfaces**
+   - Create TypeScript interfaces for `IStaking`, `IDonations`, and `IRewards` that define the expected contract methods.  
+   - Include methods like `stakeTokens(amount)`, `unstakeTokens(stakeId)`, `donateTokens(amount, charityId)`, `claimReward(rewardId)`.
+
+2. **Contract ABI & Service Layer**
+   - Add a `contracts/` folder with placeholder ABIs (JSON) for Staking, Donations, and Rewards contracts.  
+   - Create a `contractService.ts` that can dynamically switch between `mockWeb3` and real contract interaction.  
+   - Ensure methods mirror the mock service so existing UI doesn’t break.
+
+3. **Configuration**
+   - Add `config/contracts.ts` to hold placeholder contract addresses (for testnet deployment later).  
+   - Support environment switching: `MOCK_MODE=true/false`.
+
+4. **Integration with Existing Hooks**
+   - Update the `use-mock-web3.tsx` hook so it can either call the mock service or delegate to the new contract service.  
+   - Preserve backward compatibility (default = mock mode).
+
+5. **Developer Tools**
+   - Add clear developer documentation inside `README.md` on how to switch between mock mode and contract mode.  
+   - Include instructions for adding actual ABIs and addresses later.
+
+---
+
+✅ Deliverables for Sprint 8:
+- `contracts/` folder with ABIs (placeholders).  
+- `contractService.ts` providing unified contract interaction methods.  
+- Updated hooks with switchable logic (`mock` vs `contract`).  
+- Config file with contract placeholders.  
+- Updated documentation in `README.md`.
+
+⚠️ Important:
+- Do not remove or break existing mock functionality.  
+- The UI must remain fully functional in mock mode after this sprint.  
+- Focus is on **architecture preparation**, not on deploying real contracts yet.
+
