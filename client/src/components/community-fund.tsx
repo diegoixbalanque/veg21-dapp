@@ -121,13 +121,11 @@ export function CommunityFund() {
   };
 
   const handleDonation = async (charityId: number, amount?: number) => {
-    if (!isConnected) {
+    // In development mode with mock Web3, we only need mockWeb3 to be initialized
+    const canDonate = import.meta.env.DEV ? mockWeb3.isInitialized : (isConnected && mockWeb3.isInitialized);
+    
+    if (!canDonate) {
       showMessage('error', 'Wallet Requerida', 'Necesitas conectar tu wallet antes de hacer una donación.');
-      return;
-    }
-
-    if (!mockWeb3.isInitialized) {
-      showMessage('error', 'Web3 No Inicializado', 'Por favor, espera a que se inicialice la conexión Web3.');
       return;
     }
 
@@ -224,7 +222,7 @@ export function CommunityFund() {
             </div>
             
             {/* User Contributions */}
-            {isConnected && mockWeb3.isInitialized && (
+            {(import.meta.env.DEV ? mockWeb3.isInitialized : (isConnected && mockWeb3.isInitialized)) && (
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-xl border border-blue-100">
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Tus Contribuciones</h3>
                 <div className="space-y-4">
@@ -342,7 +340,7 @@ export function CommunityFund() {
                 
                 <div className="space-y-4">
                   {/* Custom Donation Amount */}
-                  {isConnected && mockWeb3.isInitialized && (
+                  {(import.meta.env.DEV ? mockWeb3.isInitialized : (isConnected && mockWeb3.isInitialized)) && (
                     <div className="bg-gray-50 rounded-lg p-4">
                       <Label htmlFor={`amount-${charity.id}`} className="text-sm font-medium text-gray-700">
                         Monto de Donación (VEG21)
@@ -389,7 +387,7 @@ export function CommunityFund() {
                   <div className="space-y-3">
                     <Button 
                       onClick={() => handleDonation(charity.id)}
-                      disabled={donatingTo === charity.id || isContributing || !isConnected || !mockWeb3.isInitialized}
+                      disabled={donatingTo === charity.id || isContributing || !(import.meta.env.DEV ? mockWeb3.isInitialized : (isConnected && mockWeb3.isInitialized))}
                       className="w-full bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary transform hover:scale-105 transition-all duration-200 shadow-lg"
                       data-testid={`button-donate-${charity.id}`}
                     >
@@ -401,7 +399,7 @@ export function CommunityFund() {
                       ) : (
                         <>
                           <Heart className="mr-2 h-4 w-4" />
-                          {isConnected && mockWeb3.isInitialized 
+                          {(import.meta.env.DEV ? mockWeb3.isInitialized : (isConnected && mockWeb3.isInitialized))
                             ? `Donar ${customAmount || '50'} VEG21`
                             : 'Conectar para Donar'
                           }

@@ -9,12 +9,6 @@ export class EthersService {
   private signer: any;
 
   async connectWallet(): Promise<string> {
-    // In development mode, create a mock ethereum provider if none exists
-    if (!window.ethereum && import.meta.env.DEV) {
-      console.warn('Development mode: Creating mock ethereum provider');
-      window.ethereum = this.createMockEthereumProvider();
-    }
-    
     if (!window.ethereum) {
       throw new Error('MetaMask is not installed!');
     }
@@ -140,42 +134,6 @@ export class EthersService {
   formatAddress(address: string): string {
     if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  }
-
-  // Create a mock ethereum provider for development/testing
-  private createMockEthereumProvider(): any {
-    const mockAddress = '0x742d35Cc6634C0532925a3b8D62Ac6E7C99191c7';
-    
-    return {
-      request: async ({ method, params }: { method: string; params?: any[] }) => {
-        switch (method) {
-          case 'eth_accounts':
-          case 'eth_requestAccounts':
-            return [mockAddress];
-            
-          case 'eth_chainId':
-            return '0x250'; // Astar Network chain ID
-            
-          case 'wallet_switchEthereumChain':
-          case 'wallet_addEthereumChain':
-            // Simulate successful network operations
-            return null;
-            
-          default:
-            console.warn(`Mock ethereum provider: Unhandled method ${method}`);
-            return null;
-        }
-      },
-      
-      // Event listener methods for compatibility
-      on: (event: string, handler: (...args: any[]) => void) => {
-        console.log(`Mock ethereum provider: Registered listener for ${event}`);
-      },
-      
-      removeListener: (event: string, handler: (...args: any[]) => void) => {
-        console.log(`Mock ethereum provider: Removed listener for ${event}`);
-      }
-    };
   }
 }
 
