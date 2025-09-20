@@ -1,4 +1,4 @@
-import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink, Coins, Trophy, Home } from "lucide-react";
+import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink, Coins, Trophy, Home, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/hooks/use-wallet";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -73,6 +73,20 @@ export function Header() {
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   Leaderboard
+                </Button>
+              </Link>
+              <Link href="/profile">
+                <Button
+                  variant={location === "/profile" ? "default" : "ghost"}
+                  className={`${
+                    location === "/profile" 
+                      ? "bg-veg-primary text-white hover:bg-veg-secondary" 
+                      : "text-gray-700 hover:text-veg-primary"
+                  }`}
+                  data-testid="nav-profile"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Perfil
                 </Button>
               </Link>
             </nav>
