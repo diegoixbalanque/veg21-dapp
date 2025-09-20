@@ -42,13 +42,12 @@ export function UserActivity() {
       });
     });
 
-    // Add reward claim transactions
+    // Add all mock Web3 transactions (rewards, staking, etc.)
     const allMockTransactions = mockWeb3Service.getTransactions();
     allMockTransactions.forEach((transaction: MockTransaction) => {
       if (transaction.type === 'claim_reward') {
-        // Try to find the reward description from the rewards array
-        const reward = mockWeb3.rewards.find(r => r.claimed);
-        const description = reward?.description || 'Recompensa reclamada';
+        // Use transaction metadata for accurate description
+        const description = transaction.metadata?.description || 'Recompensa reclamada';
         
         transactions.push({
           id: `reward-${transaction.id}`,
@@ -58,7 +57,52 @@ export function UserActivity() {
           timestamp: transaction.timestamp,
           txHash: transaction.txHash,
           metadata: {
-            rewardType: description
+            rewardType: description,
+            rewardId: transaction.metadata?.rewardId
+          }
+        });
+      } else if (transaction.type === 'stake_tokens') {
+        const description = transaction.metadata?.description || 'Tokens apostados para ganar recompensas';
+        
+        transactions.push({
+          id: `stake-${transaction.id}`,
+          type: 'staking',
+          amount: transaction.amount,
+          description: description,
+          timestamp: transaction.timestamp,
+          txHash: transaction.txHash,
+          metadata: {
+            stakeId: transaction.metadata?.stakeId
+          }
+        });
+      } else if (transaction.type === 'unstake_tokens') {
+        const description = transaction.metadata?.description || 'Tokens retirados con recompensas incluidas';
+        
+        transactions.push({
+          id: `unstake-${transaction.id}`,
+          type: 'unstaking',
+          amount: transaction.amount,
+          description: description,
+          timestamp: transaction.timestamp,
+          txHash: transaction.txHash,
+          metadata: {
+            stakeId: transaction.metadata?.stakeId
+          }
+        });
+      } else if (transaction.type === 'contribute') {
+        const charityName = getCharityName(transaction.metadata?.charityId || '');
+        const description = `Donación a ${charityName}`;
+        
+        transactions.push({
+          id: `donation-${transaction.id}`,
+          type: 'donation_made',
+          amount: transaction.amount,
+          description: description,
+          timestamp: transaction.timestamp,
+          txHash: transaction.txHash,
+          metadata: {
+            charityId: transaction.metadata?.charityId,
+            charityName: charityName
           }
         });
       }

@@ -55,6 +55,12 @@ export interface MockTransaction {
   status: 'pending' | 'confirmed' | 'failed';
   timestamp: Date;
   txHash: string;
+  metadata?: {
+    rewardId?: string;
+    charityId?: string;
+    stakeId?: string;
+    description?: string;
+  };
 }
 
 // Storage keys for localStorage persistence
@@ -324,7 +330,11 @@ class MockWeb3Service {
           amount: reward.amount,
           status: 'confirmed',
           timestamp: new Date(),
-          txHash: this.generateTxHash()
+          txHash: this.generateTxHash(),
+          metadata: {
+            rewardId: reward.id,
+            description: reward.description
+          }
         };
 
         this.transactions.push(transaction);
@@ -374,7 +384,11 @@ class MockWeb3Service {
           amount,
           status: 'confirmed',
           timestamp: new Date(),
-          txHash: contribution.txHash
+          txHash: contribution.txHash,
+          metadata: {
+            charityId: charityId,
+            description: `Donación a organización benéfica`
+          }
         };
 
         this.state.contributions.push(contribution);
@@ -442,7 +456,11 @@ class MockWeb3Service {
           amount,
           status: 'confirmed',
           timestamp: new Date(),
-          txHash: stake.txHash
+          txHash: stake.txHash,
+          metadata: {
+            stakeId: stake.id,
+            description: `Tokens apostados para ganar recompensas (5% APY)`
+          }
         };
 
         this.state.stakes.push(stake);
@@ -495,7 +513,11 @@ class MockWeb3Service {
           amount: totalReturn,
           status: 'confirmed',
           timestamp: new Date(),
-          txHash: this.generateTxHash()
+          txHash: this.generateTxHash(),
+          metadata: {
+            stakeId: stake.id,
+            description: `Tokens retirados con ${formatTokenAmount(rewardsEarned, 2)} VEG21 de recompensas`
+          }
         };
 
         this.transactions.push(transaction);
