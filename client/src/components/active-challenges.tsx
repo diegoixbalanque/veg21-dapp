@@ -80,10 +80,10 @@ export function ActiveChallenges() {
   };
 
   const handleJoinChallenge = async (challenge: Challenge) => {
-    console.log('Join challenge clicked:', { isConnected, mockWeb3Initialized: mockWeb3.isInitialized, challenge: challenge.id });
+    // In development mode with mock Web3, we only need mockWeb3 to be initialized
+    const canJoin = import.meta.env.DEV ? mockWeb3.isInitialized : (isConnected && mockWeb3.isInitialized);
     
-    if (!isConnected || !mockWeb3.isInitialized) {
-      console.log('Wallet check failed:', { isConnected, mockWeb3Initialized: mockWeb3.isInitialized });
+    if (!canJoin) {
       showMessage('error', 'Wallet Requerida', 'Necesitas conectar tu wallet antes de unirte a un reto.');
       return;
     }
@@ -106,6 +106,19 @@ export function ActiveChallenges() {
       
       setJoinedChallenges(prev => new Set([...Array.from(prev), challenge.id]));
       setChallengeProgress(prev => ({ ...prev, [challenge.id]: 1 }));
+      
+      // For the main challenge, unlock milestone rewards to demonstrate the system
+      if (challenge.id === 1) {
+        // Simulate user has been working on challenge for some days by unlocking day 7 reward
+        mockWeb3.unlockReward('day_7_milestone');
+        
+        // Optionally also unlock day 14 if they've progressed further (for demo purposes)
+        // This simulates a user who has been active
+        if (Math.random() > 0.5) { // 50% chance to unlock day 14 reward too
+          mockWeb3.unlockReward('day_14_milestone');
+        }
+      }
+      
       showMessage('success', '¡Te has unido al reto!', 'Ahora formas parte del desafío. ¡Completa tus objetivos diarios para ganar tokens VEG21!');
     } catch (error) {
       showMessage('error', 'Error', 'Hubo un problema al unirse al reto. Intenta de nuevo.');
