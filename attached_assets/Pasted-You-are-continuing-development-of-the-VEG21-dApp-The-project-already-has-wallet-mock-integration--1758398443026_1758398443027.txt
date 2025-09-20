@@ -1,0 +1,46 @@
+You are continuing development of the VEG21 dApp.  
+The project already has wallet mock integration, challenge tracker with milestone rewards, donation system, staking, and a transaction-based user activity feed.  
+Do not remove or overwrite existing functionality — extend it incrementally.
+
+### Sprint 5 Goals:
+1. **Global Impact Leaderboard**
+   - Create a new `Leaderboard` component/page.
+   - Rank users by:
+     - Total VEG21 tokens earned (rewards).
+     - Total donations contributed.
+     - Total staking rewards accumulated.
+   - Provide both **global ranking** and **personal ranking** (highlight the current user).
+   - Use mock data for other users, combined with the current user’s real stats from `mockWeb3`.
+
+2. **Impact Metrics**
+   - Show cumulative statistics at the top of the leaderboard:
+     - Total tokens distributed via rewards.
+     - Total tokens donated to community funds.
+     - Total tokens currently staked.
+   - All values should update dynamically from the mockWeb3 state.
+
+3. **UI/UX**
+   - Each leaderboard row should show:
+     - Rank position
+     - User address/username
+     - Tokens earned, donated, and staked
+   - Highlight the logged-in wallet (mock) in the list with a special style.
+   - Add badges/medals for top 3 positions.
+
+4. **Persistence**
+   - Ensure leaderboard and impact stats are saved to localStorage and reloaded on refresh.
+   - Keep using mockWeb3 as the source of truth for current user stats.
+
+---
+
+### Deliverables for Sprint 5:
+- A new `Leaderboard` component integrated into navigation.
+- Ranking table with mock users + current user.
+- Dynamic impact metrics summary.
+- Styled UI with medal/badge indicators.
+- State persistence using localStorage.
+
+**Important Notes:**
+- Do not remove or break existing features (wallet connection, rewards, donations, staking, activity feed).
+- Work incrementally and test after each step.
+- Use mock data for global leaderboard until real backend/blockchain integration is added in later sprints.
