@@ -4,9 +4,10 @@ import { useWallet } from "@/hooks/use-wallet";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { formatTokenAmount } from "@/lib/mockWeb3";
 import { Link, useLocation } from "wouter";
+import { DemoWalletButton } from "@/components/demo-wallet-button";
 
 export function Header() {
-  const { isConnected, isConnecting, connectWallet, disconnectWallet, formattedAddress, error, retryConnection, clearError, mockWeb3 } = useWallet();
+  const { isConnected, isConnecting, connectWallet, disconnectWallet, formattedAddress, error, retryConnection, clearError, mockWeb3, isDemoMode } = useWallet();
   const [location] = useLocation();
 
   const handleWalletClick = async () => {
@@ -107,9 +108,11 @@ export function Header() {
             
             <div className="flex items-center space-x-4">
               {isConnected && (
-                <div className="flex items-center space-x-2 bg-green-50 px-3 py-1 rounded-full">
-                  <div className="w-2 h-2 bg-veg-primary rounded-full animate-pulse"></div>
-                  <span className="text-sm text-veg-secondary font-medium">Astar Network</span>
+                <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${isDemoMode ? 'bg-purple-50' : 'bg-green-50'}`}>
+                  <div className={`w-2 h-2 rounded-full animate-pulse ${isDemoMode ? 'bg-purple-500' : 'bg-veg-primary'}`}></div>
+                  <span className={`text-sm font-medium ${isDemoMode ? 'text-purple-700' : 'text-veg-secondary'}`}>
+                    {isDemoMode ? 'Demo Network' : 'Astar Network'}
+                  </span>
                 </div>
               )}
               
@@ -125,23 +128,40 @@ export function Header() {
                       {formatTokenAmount(mockWeb3.balance.astr, 3)} ASTR
                     </div>
                   </div>
+                  {isDemoMode && (
+                    <div className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                      DEMO
+                    </div>
+                  )}
                 </div>
               )}
               
               {isConnected ? (
-                <div className="bg-gray-100 px-4 py-2 rounded-xl">
-                  <span className="text-sm text-gray-600">{formattedAddress}</span>
+                <div className={`px-4 py-2 rounded-xl ${isDemoMode ? 'bg-purple-100 border border-purple-200' : 'bg-gray-100'}`}>
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-sm ${isDemoMode ? 'text-purple-700' : 'text-gray-600'}`}>
+                      {formattedAddress}
+                    </span>
+                    {isDemoMode && (
+                      <span className="px-2 py-1 bg-purple-600 text-white text-xs font-medium rounded-full">
+                        DEMO
+                      </span>
+                    )}
+                  </div>
                 </div>
               ) : (
-                <Button 
-                  onClick={handleWalletClick}
-                  disabled={isConnecting}
-                  className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  data-testid="button-connect-wallet"
-                >
-                  <Wallet className="mr-2 h-4 w-4" />
-                  {isConnecting ? 'Conectando...' : 'Conectar Wallet'}
-                </Button>
+                <div className="flex items-center space-x-3">
+                  <DemoWalletButton />
+                  <Button 
+                    onClick={handleWalletClick}
+                    disabled={isConnecting}
+                    className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    data-testid="button-connect-wallet"
+                  >
+                    <Wallet className="mr-2 h-4 w-4" />
+                    {isConnecting ? 'Conectando...' : 'Conectar Wallet'}
+                  </Button>
+                </div>
               )}
             </div>
           </div>
