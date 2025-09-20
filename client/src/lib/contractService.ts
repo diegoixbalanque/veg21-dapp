@@ -351,10 +351,10 @@ class ContractToken extends BaseContract implements IToken {
 
 // Main contract service implementation
 class ContractService implements IContractService {
-  public staking: IStaking;
-  public donations: IDonations;
-  public rewards: IRewards;
-  public token: IToken;
+  public staking!: IStaking;
+  public donations!: IDonations;
+  public rewards!: IRewards;
+  public token!: IToken;
 
   private config: ServiceConfig;
   private eventListeners: Map<ContractEventType, ContractEventCallback[]> = new Map();

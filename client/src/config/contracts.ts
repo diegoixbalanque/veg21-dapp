@@ -222,4 +222,5 @@ npx hardhat verify --network ${network} \${contractAddresses.rewards} \${contrac
 export const SERVICE_CONFIG = createServiceConfig();
 
 // Type exports for external use
-export type { ContractConfig, ServiceConfig, ServiceMode };
+export type { ContractConfig, ServiceConfig };
+export { ServiceMode };
