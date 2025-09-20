@@ -69,33 +69,25 @@ class MockWeb3Service {
   private initializeDefaultRewards() {
     const defaultRewards: ClaimableReward[] = [
       {
-        id: 'day_1_bonus',
+        id: 'day_7_milestone',
         type: 'milestone',
-        amount: 50,
-        description: 'Premio por tu primer día vegano',
+        amount: 5,
+        description: 'Completaste 7 días veganos',
         unlocked: false,
         claimed: false
       },
       {
-        id: 'week_1_milestone',
+        id: 'day_14_milestone',
         type: 'milestone',
-        amount: 100,
-        description: 'Completaste tu primera semana vegana',
-        unlocked: false,
-        claimed: false
-      },
-      {
-        id: 'week_2_milestone',
-        type: 'milestone',
-        amount: 150,
+        amount: 10,
         description: 'Dos semanas de compromiso vegano',
         unlocked: false,
         claimed: false
       },
       {
-        id: 'challenge_complete',
+        id: 'day_21_milestone',
         type: 'milestone',
-        amount: 300,
+        amount: 20,
         description: '¡Completaste el desafío de 21 días!',
         unlocked: false,
         claimed: false
@@ -103,7 +95,7 @@ class MockWeb3Service {
       {
         id: 'community_champion',
         type: 'bonus',
-        amount: 75,
+        amount: 25,
         description: 'Contribuiste a la comunidad vegana',
         unlocked: false,
         claimed: false
@@ -384,6 +376,24 @@ class MockWeb3Service {
   // Get transaction history
   getTransactions(): MockTransaction[] {
     return [...this.transactions];
+  }
+
+  // Add a new transaction (public method for external use)
+  addTransaction(type: MockTransaction['type'], amount: number, description?: string): MockTransaction {
+    const transaction: MockTransaction = {
+      id: `${type}_${Date.now()}`,
+      type,
+      amount,
+      status: 'confirmed',
+      timestamp: new Date(),
+      txHash: this.generateTxHash()
+    };
+
+    this.transactions.push(transaction);
+    this.saveTransactionsToStorage();
+    this.emit('state_changed', this.state);
+    
+    return transaction;
   }
 
   // Reset all data (for testing/demo purposes)
