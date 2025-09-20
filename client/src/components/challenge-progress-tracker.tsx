@@ -75,7 +75,8 @@ export function ChallengeProgressTracker({
       const web3Reward = mockWeb3.rewards.find(r => r.id === milestone.rewardId);
       return {
         ...milestone,
-        unlocked: isActive && currentDay >= milestone.day,
+        // A milestone is unlocked if either the user has progressed enough OR if it's been unlocked in mockWeb3
+        unlocked: (isActive && currentDay >= milestone.day) || (web3Reward?.unlocked || false),
         claimed: web3Reward?.claimed || false
       };
     });
