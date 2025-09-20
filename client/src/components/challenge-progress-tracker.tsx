@@ -269,78 +269,103 @@ export function ChallengeProgressTracker({
             </div>
           )}
           
-          {/* Milestone Rewards */}
+          {/* Milestone Rewards - Enhanced */}
           {currentMilestones.some(m => m.unlocked) && (
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 mb-4 border border-yellow-200">
-              <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                <Gift className="w-5 h-5 text-yellow-600 mr-2" />
-                Recompensas de Hitos
-              </h4>
-              <div className="space-y-3">
-                {currentMilestones
-                  .filter(milestone => milestone.unlocked)
-                  .map((milestone) => (
-                    <div key={milestone.rewardId} className="flex items-center justify-between p-3 bg-white rounded-lg border border-yellow-100">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                          <Star className="w-5 h-5 text-white" />
+            <div className="bg-gradient-to-r from-yellow-50 via-orange-50 to-yellow-50 rounded-2xl p-6 mb-6 border-2 border-yellow-300 shadow-lg relative overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-200 rounded-full opacity-20 -mr-12 -mt-12"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 bg-orange-200 rounded-full opacity-20 -ml-8 -mb-8"></div>
+              
+              <div className="relative">
+                <h4 className="text-xl font-bold text-gray-900 mb-2 flex items-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mr-3">
+                    <Gift className="w-5 h-5 text-white" />
+                  </div>
+                  🎉 ¡Recompensas Disponibles!
+                </h4>
+                <p className="text-sm text-gray-700 mb-4">Has desbloqueado recompensas por tu progreso. ¡Reclámalas ahora!</p>
+                
+                <div className="space-y-4">
+                  {currentMilestones
+                    .filter(milestone => milestone.unlocked)
+                    .map((milestone) => (
+                      <div key={milestone.rewardId} className="flex items-center justify-between p-4 bg-white rounded-xl border-2 border-yellow-200 shadow-md hover:shadow-lg transition-all duration-300">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                            <Star className="w-7 h-7 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 text-lg">Día {milestone.day} Completado</p>
+                            <p className="text-sm text-gray-700 mb-2">{milestone.description}</p>
+                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300 text-sm font-semibold">
+                              💰 {formatTokenAmount(milestone.amount, 0)} VEG21 tokens
+                            </Badge>
+                          </div>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-800">Día {milestone.day} Completado</p>
-                          <p className="text-sm text-gray-600">{milestone.description}</p>
-                          <Badge variant="secondary" className="mt-1">
-                            {formatTokenAmount(milestone.amount, 0)} VEG21 tokens
-                          </Badge>
+                          {milestone.claimed ? (
+                            <Badge variant="default" className="bg-green-200 text-green-900 border-green-300 px-4 py-2 text-base font-semibold">
+                              ✅ Reclamado
+                            </Badge>
+                          ) : (
+                            <Button
+                              onClick={() => handleClaimReward(milestone.rewardId)}
+                              disabled={claimingReward === milestone.rewardId || !mockWeb3.isInitialized}
+                              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 px-6 py-3 text-base font-bold"
+                              size="lg"
+                              data-testid={`claim-reward-${milestone.rewardId}`}
+                            >
+                              {claimingReward === milestone.rewardId ? (
+                                <>
+                                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                  Reclamando...
+                                </>
+                              ) : (
+                                <>
+                                  <Gift className="w-5 h-5 mr-2" />
+                                  🎁 Reclamar Ahora
+                                </>
+                              )}
+                            </Button>
+                          )}
                         </div>
                       </div>
-                      <div>
-                        {milestone.claimed ? (
-                          <Badge variant="default" className="bg-green-100 text-green-800">
-                            ✓ Reclamado
-                          </Badge>
-                        ) : (
-                          <Button
-                            onClick={() => handleClaimReward(milestone.rewardId)}
-                            disabled={claimingReward === milestone.rewardId || !mockWeb3.isInitialized}
-                            className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600"
-                            size="sm"
-                            data-testid={`claim-reward-${milestone.rewardId}`}
-                          >
-                            {claimingReward === milestone.rewardId ? (
-                              <Loader2 className="w-4 h-4 animate-spin mr-1" />
-                            ) : (
-                              <Gift className="w-4 h-4 mr-1" />
-                            )}
-                            {claimingReward === milestone.rewardId ? 'Reclamando...' : 'Reclamar'}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                }
+                    ))
+                  }
+                </div>
               </div>
             </div>
           )}
 
-          {/* Compact Progress View */}
+          {/* Compact Progress View - Enhanced */}
           {!expandedView && (
-            <div className="grid grid-cols-7 gap-2 mb-4">
+            <div className="grid grid-cols-7 gap-3 mb-4">
               {daysData.slice(0, 14).map((day) => {
                 const isMilestone = currentMilestones.some(m => m.day === day.day);
                 const milestoneData = currentMilestones.find(m => m.day === day.day);
+                const isUnlockedMilestone = isMilestone && milestoneData?.unlocked;
                 
                 return (
                   <div
                     key={day.day}
-                    className={`w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-semibold transition-all duration-200 relative ${
+                    className={`w-12 h-12 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all duration-200 relative hover:scale-110 ${
                       getStatusStyle(day.status)
-                    } ${isMilestone ? 'ring-2 ring-yellow-400' : ''}`}
-                    title={`Día ${day.day}: ${day.task}${isMilestone ? ` - Hito: ${milestoneData?.amount} VEG21` : ''}`}
+                    } ${isMilestone ? 'ring-3 ring-yellow-400 ring-offset-1' : ''} ${
+                      isUnlockedMilestone ? 'shadow-lg shadow-yellow-400/50 animate-pulse' : ''
+                    }`}
+                    title={`Día ${day.day}: ${day.task}${isMilestone ? ` - 🎁 Hito: ${milestoneData?.amount} VEG21` : ''}`}
                   >
                     {day.status === 'completed' ? '✓' : day.day}
                     {isMilestone && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full flex items-center justify-center">
-                        <Star className="w-2 h-2 text-white" />
+                      <div className={`absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center shadow-md ${
+                        isUnlockedMilestone ? 'bg-gradient-to-br from-yellow-400 to-orange-500 animate-bounce' : 'bg-yellow-400'
+                      }`}>
+                        <Star className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                    {isUnlockedMilestone && (
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
+                        <div className="text-xs font-bold text-yellow-600 bg-yellow-100 px-1 rounded">🎁</div>
                       </div>
                     )}
                   </div>
