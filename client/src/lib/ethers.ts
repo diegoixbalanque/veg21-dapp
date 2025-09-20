@@ -70,35 +70,62 @@ export class EthersService {
         method: 'eth_chainId'
       });
       
-      // If already on Astar network, no need to switch
-      if (currentChainId === '0x250') {
+      // Check for both mainnet (0x250) and testnet (0x51) Astar networks
+      if (currentChainId === '0x250' || currentChainId === '0x51') {
         return;
       }
 
+      // For development, prefer Shibuya testnet
+      const isDevelopment = import.meta.env.DEV;
+      const targetChainId = isDevelopment ? '0x51' : '0x250'; // Shibuya testnet for dev, mainnet for prod
+
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x250' }], // Astar Network
+        params: [{ chainId: targetChainId }],
       });
     } catch (switchError: any) {
       // This error code indicates that the chain has not been added to MetaMask
       if (switchError.code === 4902) {
         try {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainId: '0x250',
-                chainName: 'Astar Network',
-                nativeCurrency: {
-                  name: 'ASTR',
-                  symbol: 'ASTR',
-                  decimals: 18,
+          const isDevelopment = import.meta.env.DEV;
+          
+          if (isDevelopment) {
+            // Add Shibuya testnet
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x51',
+                  chainName: 'Astar Shibuya Testnet',
+                  nativeCurrency: {
+                    name: 'Shibuya',
+                    symbol: 'SBY',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://evm.shibuya.astar.network'],
+                  blockExplorerUrls: ['https://shibuya.subscan.io'],
                 },
-                rpcUrls: ['https://evm.astar.network'],
-                blockExplorerUrls: ['https://astar.subscan.io'],
-              },
-            ],
-          });
+              ],
+            });
+          } else {
+            // Add Astar mainnet
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x250',
+                  chainName: 'Astar Network',
+                  nativeCurrency: {
+                    name: 'ASTR',
+                    symbol: 'ASTR',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://evm.astar.network'],
+                  blockExplorerUrls: ['https://astar.subscan.io'],
+                },
+              ],
+            });
+          }
         } catch (addError: any) {
           console.error('Failed to add Astar Network:', addError);
           throw new Error(`Failed to add Astar Network: ${addError.message}`);
@@ -128,7 +155,7 @@ export class EthersService {
   }
   
   isAstarNetwork(chainId: string): boolean {
-    return chainId === '0x250';
+    return chainId === '0x250' || chainId === '0x51'; // Mainnet or Shibuya testnet
   }
 
   formatAddress(address: string): string {
