@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MessageModal } from "./message-modal";
 import { ChallengeProgressTracker } from "./challenge-progress-tracker";
 import { useWallet } from "@/hooks/use-wallet";
+import { useMockWeb3 } from "@/hooks/use-mock-web3";
 
 interface Challenge {
   id: number;
@@ -72,13 +73,17 @@ export function ActiveChallenges() {
   }>({ isOpen: false, type: 'success', title: '', message: '' });
 
   const { isConnected } = useWallet();
+  const mockWeb3 = useMockWeb3();
 
   const showMessage = (type: 'success' | 'error', title: string, message: string) => {
     setModalState({ isOpen: true, type, title, message });
   };
 
   const handleJoinChallenge = async (challenge: Challenge) => {
-    if (!isConnected) {
+    console.log('Join challenge clicked:', { isConnected, mockWeb3Initialized: mockWeb3.isInitialized, challenge: challenge.id });
+    
+    if (!isConnected || !mockWeb3.isInitialized) {
+      console.log('Wallet check failed:', { isConnected, mockWeb3Initialized: mockWeb3.isInitialized });
       showMessage('error', 'Wallet Requerida', 'Necesitas conectar tu wallet antes de unirte a un reto.');
       return;
     }
