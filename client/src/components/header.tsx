@@ -1,11 +1,13 @@
-import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink, Coins } from "lucide-react";
+import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink, Coins, Trophy, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/hooks/use-wallet";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { formatTokenAmount } from "@/lib/mockWeb3";
+import { Link, useLocation } from "wouter";
 
 export function Header() {
   const { isConnected, isConnecting, connectWallet, disconnectWallet, formattedAddress, error, retryConnection, clearError, mockWeb3 } = useWallet();
+  const [location] = useLocation();
 
   const handleWalletClick = async () => {
     if (isConnected) {
@@ -30,14 +32,50 @@ export function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-veg-primary to-veg-secondary rounded-xl flex items-center justify-center">
-                <Leaf className="text-white text-lg" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-veg-dark">VEG21</h1>
-                <p className="text-xs text-gray-600">Astar Network</p>
-              </div>
+              <Link href="/">
+                <div className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
+                  <div className="w-10 h-10 bg-gradient-to-br from-veg-primary to-veg-secondary rounded-xl flex items-center justify-center">
+                    <Leaf className="text-white text-lg" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-veg-dark">VEG21</h1>
+                    <p className="text-xs text-gray-600">Astar Network</p>
+                  </div>
+                </div>
+              </Link>
             </div>
+
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center space-x-1">
+              <Link href="/">
+                <Button
+                  variant={location === "/" ? "default" : "ghost"}
+                  className={`${
+                    location === "/" 
+                      ? "bg-veg-primary text-white hover:bg-veg-secondary" 
+                      : "text-gray-700 hover:text-veg-primary"
+                  }`}
+                  data-testid="nav-home"
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Inicio
+                </Button>
+              </Link>
+              <Link href="/leaderboard">
+                <Button
+                  variant={location === "/leaderboard" ? "default" : "ghost"}
+                  className={`${
+                    location === "/leaderboard" 
+                      ? "bg-veg-primary text-white hover:bg-veg-secondary" 
+                      : "text-gray-700 hover:text-veg-primary"
+                  }`}
+                  data-testid="nav-leaderboard"
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Leaderboard
+                </Button>
+              </Link>
+            </nav>
             
             <div className="flex items-center space-x-4">
               {isConnected && (

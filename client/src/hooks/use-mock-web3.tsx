@@ -18,6 +18,8 @@ export interface MockWeb3HookState {
   contributions: ContributionRecord[];
   totalEarned: number;
   totalContributed: number;
+  totalStaked: number;
+  totalStakingRewards: number;
   error: string | null;
 }
 
@@ -44,6 +46,8 @@ export function useMockWeb3(): UseMockWeb3Return {
     contributions: [],
     totalEarned: 0,
     totalContributed: 0,
+    totalStaked: 0,
+    totalStakingRewards: 0,
     error: null
   });
 
@@ -59,6 +63,8 @@ export function useMockWeb3(): UseMockWeb3Return {
       contributions: serviceState.contributions,
       totalEarned: serviceState.totalEarned,
       totalContributed: serviceState.totalContributed,
+      totalStaked: serviceState.totalStaked,
+      totalStakingRewards: serviceState.totalStakingRewards,
       error: null
     }));
   }, []);
