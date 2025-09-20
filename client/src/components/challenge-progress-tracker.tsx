@@ -44,33 +44,25 @@ export function ChallengeProgressTracker({
   // Define reward milestones
   const milestones: Milestone[] = [
     {
-      day: 1,
-      rewardId: 'day_1_bonus',
-      amount: 50,
-      description: 'Premio por tu primer día vegano',
-      unlocked: false,
-      claimed: false
-    },
-    {
       day: 7,
-      rewardId: 'week_1_milestone',
-      amount: 100,
-      description: 'Completaste tu primera semana vegana',
+      rewardId: 'day_7_milestone',
+      amount: 5,
+      description: 'Completaste 7 días veganos',
       unlocked: false,
       claimed: false
     },
     {
       day: 14,
-      rewardId: 'week_2_milestone',
-      amount: 150,
+      rewardId: 'day_14_milestone',
+      amount: 10,
       description: 'Dos semanas de compromiso vegano',
       unlocked: false,
       claimed: false
     },
     {
       day: 21,
-      rewardId: 'challenge_complete',
-      amount: 300,
+      rewardId: 'day_21_milestone',
+      amount: 20,
       description: '¡Completaste el desafío de 21 días!',
       unlocked: false,
       claimed: false

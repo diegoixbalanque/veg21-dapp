@@ -3,6 +3,7 @@ import { HeroSection } from "@/components/hero-section";
 import { ActiveChallenges } from "@/components/active-challenges";
 import { CommunityFund } from "@/components/community-fund";
 import { VeganImpactRanking } from "@/components/vegan-impact-ranking";
+import UserActivity from "@/components/user-activity";
 import { Footer } from "@/components/footer";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
       <ActiveChallenges />
       <CommunityFund />
       <VeganImpactRanking />
+      <UserActivity />
       <Footer />
     </div>
   );
