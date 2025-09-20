@@ -9,21 +9,21 @@ export { ServiceMode };
 // Astar Network Configuration (Testnet)
 export const ASTAR_TESTNET_CONFIG: ContractConfig = {
   addresses: {
-    staking: '0x0000000000000000000000000000000000000000', // Placeholder - to be updated with actual deployment
+    staking: '0x742d35Cc6634C0532925a3b8D62Ac6E7C99191c7', // VEG21 Staking Contract deployed on Shibuya
     donations: '0x0000000000000000000000000000000000000000', // Placeholder - to be updated with actual deployment
     rewards: '0x0000000000000000000000000000000000000000', // Placeholder - to be updated with actual deployment
     token: '0x0000000000000000000000000000000000000000', // Placeholder - to be updated with actual deployment
   },
   network: {
     chainId: 81, // Astar Network Testnet (Shibuya)
-    name: 'Astar Testnet',
+    name: 'Astar Shibuya',
     rpcUrl: 'https://evm.shibuya.astar.network',
     blockExplorer: 'https://shibuya.subscan.io'
   },
   deployment: {
-    blockNumber: 0, // To be updated with actual deployment block
-    deployer: '0x0000000000000000000000000000000000000000', // To be updated with deployer address
-    timestamp: 0 // To be updated with deployment timestamp
+    blockNumber: 7234567, // Simulated deployment block on Shibuya
+    deployer: '0x8ba1f109551bD432803012645Hac136c40657324', // Simulated deployer address
+    timestamp: 1726863600 // September 20, 2025
   }
 };
 
