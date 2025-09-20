@@ -133,7 +133,19 @@ export function useWallet() {
     setWalletState(prev => ({ ...prev, isConnecting: true, error: null }));
 
     try {
-      const address = await ethersService.connectWallet();
+      let address: string;
+      
+      // Check if we're in mock mode
+      const serviceMode = mockWeb3.getServiceMode();
+      if (serviceMode === 'mock') {
+        // Use mock wallet connection
+        console.log('Using mock wallet connection in mock mode');
+        address = '0x742d35Cc6634C0532925a3b8D62Ac6E7C99191c7'; // Mock address
+      } else {
+        // Use real wallet connection
+        console.log('Using real wallet connection in contract mode');
+        address = await ethersService.connectWallet();
+      }
       
       // Show success message for wallet connection
       toast({
@@ -142,28 +154,38 @@ export function useWallet() {
         variant: "default",
       });
       
-      try {
-        await ethersService.switchToAstarNetwork();
-        
-        // Show success message for network switch
-        toast({
-          title: "Red Astar Conectada",
-          description: "Cambiaste exitosamente a la red Astar.",
-          variant: "default",
-        });
-      } catch (networkError: any) {
-        // Handle network switch errors gracefully
-        const error = getErrorFromException(networkError);
-        console.warn('Network switch failed:', error);
-        
-        // Don't fail wallet connection if network switch fails
-        if (error.type === 'switch_network_failed') {
+      // Only switch network if we're not in mock mode
+      if (serviceMode !== 'mock') {
+        try {
+          await ethersService.switchToAstarNetwork();
+          
+          // Show success message for network switch
           toast({
-            title: "Advertencia de Red",
-            description: "Wallet conectada, pero no se pudo cambiar a la red Astar. Puedes cambiar manualmente.",
+            title: "Red Astar Conectada",
+            description: "Cambiaste exitosamente a la red Astar.",
             variant: "default",
           });
+        } catch (networkError: any) {
+          // Handle network switch errors gracefully
+          const error = getErrorFromException(networkError);
+          console.warn('Network switch failed:', error);
+          
+          // Don't fail wallet connection if network switch fails
+          if (error.type === 'switch_network_failed') {
+            toast({
+              title: "Advertencia de Red",
+              description: "Wallet conectada, pero no se pudo cambiar a la red Astar. Puedes cambiar manualmente.",
+              variant: "default",
+            });
+          }
         }
+      } else {
+        // In mock mode, show mock network message
+        toast({
+          title: "Red Simulada Conectada",
+          description: "Conectado a la red simulada Astar (modo desarrollo).",
+          variant: "default",
+        });
       }
       
       const newWalletState = {
@@ -180,9 +202,9 @@ export function useWallet() {
         localStorage.setItem('veg21_wallet', JSON.stringify({
           address,
           connected: true,
-          network: 'astar'
+          network: serviceMode === 'mock' ? 'astar-mock' : 'astar'
         }));
-        console.log('Wallet state saved to localStorage:', address);
+        console.log('Wallet state saved to localStorage:', address, `(${serviceMode} mode)`);
       } catch (error) {
         console.warn('Failed to save wallet to localStorage:', error);
       }
