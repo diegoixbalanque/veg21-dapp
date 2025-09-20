@@ -20,9 +20,29 @@ export function useWallet() {
   const { toast } = useToast();
   const mockWeb3 = useMockWeb3();
   
+  // Check if demo mode is active
+  const isDemoMode = useCallback((): boolean => {
+    try {
+      return localStorage.getItem('veg21_demo') === 'true';
+    } catch {
+      return false;
+    }
+  }, []);
+
   // Initialize wallet state from localStorage
   const initializeWalletState = useCallback((): WalletState => {
     try {
+      // Check for demo mode first
+      if (isDemoMode()) {
+        console.log('Initializing demo wallet mode');
+        return {
+          isConnected: true,
+          address: '0xDEMO1234567890abcdef1234567890abcdef1234',
+          isConnecting: false,
+          error: null,
+        };
+      }
+      
       const storedWallet = localStorage.getItem('veg21_wallet');
       if (storedWallet) {
         const walletData = JSON.parse(storedWallet);
@@ -46,14 +66,14 @@ export function useWallet() {
       isConnecting: false,
       error: null,
     };
-  }, []);
+  }, [isDemoMode]);
 
   const [walletState, setWalletState] = useState<WalletState>(initializeWalletState);
 
   // Listen for localStorage changes to keep wallet state in sync
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'veg21_wallet') {
+      if (e.key === 'veg21_wallet' || e.key === 'veg21_demo') {
         const newState = initializeWalletState();
         console.log('Wallet localStorage changed, updating state:', newState);
         setWalletState(newState);
@@ -232,6 +252,45 @@ export function useWallet() {
     }
   }, [toast, getErrorFromException, showErrorToast]);
 
+  const connectDemo = useCallback(async () => {
+    console.log('Connecting demo wallet');
+    
+    const demoAddress = '0xDEMO1234567890abcdef1234567890abcdef1234';
+    
+    setWalletState({
+      isConnected: true,
+      address: demoAddress,
+      isConnecting: false,
+      error: null,
+    });
+    
+    // Save demo mode to localStorage
+    try {
+      localStorage.setItem('veg21_demo', 'true');
+      localStorage.setItem('veg21_wallet', JSON.stringify({
+        address: demoAddress,
+        connected: true,
+        network: 'demo'
+      }));
+      console.log('Demo wallet saved to localStorage');
+    } catch (error) {
+      console.warn('Failed to save demo wallet to localStorage:', error);
+    }
+    
+    // Initialize mock Web3 service for demo wallet
+    try {
+      await mockWeb3.initialize(demoAddress);
+    } catch (mockWeb3Error) {
+      console.warn('Failed to initialize mock Web3 for demo:', mockWeb3Error);
+    }
+    
+    toast({
+      title: "Wallet Demo Conectada",
+      description: "Estás usando una wallet de demostración. ¡Explora todas las funciones!",
+      variant: "default",
+    });
+  }, [toast, mockWeb3]);
+
   const disconnectWallet = useCallback(() => {
     setWalletState({
       isConnected: false,
@@ -240,10 +299,11 @@ export function useWallet() {
       error: null,
     });
     
-    // Clear wallet from localStorage
+    // Clear wallet and demo mode from localStorage
     try {
       localStorage.removeItem('veg21_wallet');
-      console.log('Wallet removed from localStorage');
+      localStorage.removeItem('veg21_demo');
+      console.log('Wallet and demo mode removed from localStorage');
     } catch (error) {
       console.warn('Failed to remove wallet from localStorage:', error);
     }
@@ -275,9 +335,11 @@ export function useWallet() {
   return {
     ...walletState,
     connectWallet,
+    connectDemo,
     disconnectWallet,
     retryConnection,
     clearError,
+    isDemoMode: isDemoMode(),
     formattedAddress: walletState.address ? ethersService.formatAddress(walletState.address) : null,
     // Expose mock Web3 functionality
     mockWeb3,
