@@ -3,6 +3,9 @@
 
 import { ContractConfig, ServiceConfig, ServiceMode } from '@/types/contracts';
 
+// Re-export for convenience
+export { ServiceMode };
+
 // Astar Network Configuration (Testnet)
 export const ASTAR_TESTNET_CONFIG: ContractConfig = {
   addresses: {
@@ -223,4 +226,3 @@ export const SERVICE_CONFIG = createServiceConfig();
 
 // Type exports for external use
 export type { ContractConfig, ServiceConfig };
-export { ServiceMode };

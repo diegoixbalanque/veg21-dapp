@@ -57,21 +57,153 @@ El MVP demuestra un flujo funcional que puede integrarse con negocios locales y 
 
 1. Clona este repositorio:
 
+```bash
 git clone https://github.com/diegoixbalanque/veg21-dapp.git
 cd veg21-dapp
+```
 
 2. Instala dependencias:
 
+```bash
 npm install
+```
 
 3. Inicia la aplicación:
 
+```bash
 npm run dev
+```
 
 4. Abre el navegador en http://localhost:5173
 
 También puedes ver la demo en vivo aquí:
 👉 https://veg21-dapp.onrender.com
+
+---
+
+## 🏗️ Smart Contract Integration Layer (Sprint 8)
+
+VEG21 ahora incluye una **capa de integración de contratos inteligentes** que permite alternar entre:
+
+- **Modo Mock** - Funcionalidad blockchain simulada (por defecto)
+- **Modo Contract** - Interacción real con contratos inteligentes en Astar Network
+
+### 🔧 Configuración del Entorno
+
+Por defecto, la dApp funciona en **modo mock** para desarrollo:
+
+```bash
+# Variables de entorno (.env)
+VITE_MOCK_MODE=true          # Usar modo mock (por defecto)
+VITE_ENVIRONMENT=development # Entorno objetivo
+```
+
+#### Entornos Disponibles
+
+- `development` - Desarrollo local con contratos mock
+- `testnet` - Deployment en testnet de Astar  
+- `mainnet` - Deployment en mainnet de Astar
+- `local` - Red local Hardhat
+
+### 🔄 Cambiar Entre Modos
+
+**Modo Mock (Actual)**
+```bash
+VITE_MOCK_MODE=true
+```
+
+**Modo Contract (Para blockchain real)**
+```bash
+VITE_MOCK_MODE=false
+VITE_ENVIRONMENT=testnet
+```
+
+### 📑 Contratos Soportados
+
+La dApp está diseñada para trabajar con estos contratos inteligentes:
+
+1. **VEG21 Token Contract** - Token ERC20 del ecosistema
+2. **Staking Contract** - Staking de tokens con 5% APY
+3. **Donations Contract** - Gestión de contribuciones benéficas  
+4. **Rewards Contract** - Sistema de recompensas por hitos
+
+### 🚀 Deployment Real de Contratos
+
+#### Paso 1: Deployar Contratos
+
+```bash
+# Ejemplo de script de deployment (por crear)
+npx hardhat run scripts/deploy.js --network astar-testnet
+```
+
+#### Paso 2: Actualizar Direcciones
+
+Actualiza la configuración con las direcciones deployadas:
+
+```typescript
+// client/src/config/contracts.ts
+export const ASTAR_TESTNET_CONFIG: ContractConfig = {
+  addresses: {
+    staking: '0xTuDireccionStaking',
+    donations: '0xTuDireccionDonations', 
+    rewards: '0xTuDireccionRewards',
+    token: '0xTuDireccionToken',
+  },
+  // ... resto de configuración
+};
+```
+
+#### Paso 3: Activar Modo Contract
+
+```bash
+VITE_MOCK_MODE=false
+VITE_ENVIRONMENT=testnet
+```
+
+### 📁 Estructura de Archivos
+
+```
+client/src/
+├── types/
+│   └── contracts.ts           # Interfaces de contratos
+├── contracts/
+│   ├── StakingContract.json   # ABI de Staking
+│   ├── DonationsContract.json # ABI de Donations  
+│   ├── RewardsContract.json   # ABI de Rewards
+│   └── TokenContract.json     # ABI de Token
+├── config/
+│   └── contracts.ts           # Configuración de red y direcciones
+├── lib/
+│   ├── contractService.ts     # Capa de servicio de contratos
+│   └── mockWeb3.ts           # Servicio Web3 mock (existente)
+└── hooks/
+    └── use-mock-web3.tsx     # Hook mejorado con soporte de contratos
+```
+
+### ⚠️ Notas Importantes
+
+#### Compatibilidad Hacia Atrás
+
+- Todos los componentes UI existentes continúan funcionando sin cambios
+- El modo mock sigue siendo el por defecto para desarrollo
+- No hay cambios que rompan la funcionalidad existente
+
+#### Para Deployment en Producción
+
+Para deployment en producción con contratos reales:
+
+1. ✅ Deployar los cuatro contratos inteligentes
+2. ✅ Actualizar direcciones en la configuración
+3. ✅ Configurar `VITE_MOCK_MODE=false`
+4. 🚧 Implementar lógica de interacción real con contratos
+5. ✅ Probar exhaustivamente en testnet primero
+
+#### Seguridad
+
+- Nunca commitear claves privadas o secretos
+- Validar todas las direcciones de contratos antes del deployment
+- Probar todas las funciones en testnet antes de mainnet
+- Implementar manejo de errores para fallos de contratos
 
 🔗 Smart Contract & Testnet
 
