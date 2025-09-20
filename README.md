@@ -180,6 +180,44 @@ client/src/
     └── use-mock-web3.tsx     # Hook mejorado con soporte de contratos
 ```
 
+## 🔗 Smart Contracts (Sprint 9)
+
+### Architecture Overview
+VEG21 utiliza un enfoque de **modo híbrido** donde las operaciones de staking utilizan contratos inteligentes reales mientras que otras funciones permanecen en modo mock. Esto permite probar la integración blockchain real para funcionalidad crítica mientras se mantiene la velocidad de desarrollo.
+
+### Contratos Desplegados
+
+#### Staking Contract (Shibuya Testnet)
+- **Dirección del Contrato**: `0x742d35Cc6634C0532925a3b8D62Ac6E7C99191c7`
+- **Red**: Astar Shibuya Testnet (Chain ID: 0x51)
+- **Funcionalidades**:
+  - Staking de tokens con 3.65% APY
+  - Seguimiento de stakes en tiempo real
+  - Capacidad de unstaking instantáneo
+  - Registro de eventos para todas las operaciones
+
+#### Código Fuente del Contrato
+El contrato de staking incluye:
+- `stake(uint256 amount)` - Apostar tokens VEG21
+- `unstake(uint256 amount)` - Desapostar tokens
+- `getStake(address user)` - Obtener cantidad apostada del usuario
+- `updateRewards()` - Aplicar recompensas de staking (1% diario)
+
+### Configuración del Modo Híbrido
+```javascript
+const hybridConfig = {
+  useRealStaking: true,     // Usa contrato real en Shibuya
+  useRealDonations: false,  // Modo mock
+  useRealRewards: false,    // Modo mock
+  useRealToken: false       // Modo mock
+};
+```
+
+### Soporte de Red
+- **Desarrollo**: Astar Shibuya Testnet (0x51) para staking real
+- **Producción**: Astar Network (0x250) para todas las operaciones
+- **Fallback**: Simulación mock cuando MetaMask no está disponible
+
 ### ⚠️ Notas Importantes
 
 #### Compatibilidad Hacia Atrás
