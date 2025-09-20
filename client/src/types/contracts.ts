@@ -176,7 +176,8 @@ export interface ContractConfig {
 // Service mode enum
 export enum ServiceMode {
   MOCK = 'mock',
-  CONTRACT = 'contract'
+  CONTRACT = 'contract',
+  HYBRID = 'hybrid'
 }
 
 // Environment configuration for switching modes
@@ -184,4 +185,12 @@ export interface ServiceConfig {
   mode: ServiceMode;
   mockConfig?: any; // Configuration for mock service
   contractConfig?: ContractConfig; // Configuration for contract service
+  
+  // Hybrid mode configuration - specify which modules use contracts
+  hybridConfig?: {
+    useRealStaking: boolean;
+    useRealDonations: boolean;
+    useRealRewards: boolean;
+    useRealToken: boolean;
+  };
 }

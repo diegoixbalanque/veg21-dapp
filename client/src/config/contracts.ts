@@ -92,8 +92,20 @@ export function createServiceConfig(): ServiceConfig {
   const mockMode = getEnvVar('MOCK_MODE', 'true') === 'true';
   const environment = getEnvVar('ENVIRONMENT', 'development');
   
+  // For Sprint 9: Enable hybrid mode where only staking uses real contracts
+  const hybridMode = getEnvVar('HYBRID_MODE', 'true') === 'true';
+  
+  let mode: ServiceMode;
+  if (mockMode && !hybridMode) {
+    mode = ServiceMode.MOCK;
+  } else if (!mockMode && !hybridMode) {
+    mode = ServiceMode.CONTRACT;
+  } else {
+    mode = ServiceMode.HYBRID;
+  }
+  
   return {
-    mode: mockMode ? ServiceMode.MOCK : ServiceMode.CONTRACT,
+    mode,
     mockConfig: {
       // Mock-specific configuration
       enablePersistence: true,
@@ -103,7 +115,14 @@ export function createServiceConfig(): ServiceConfig {
         astr: 0.5
       }
     },
-    contractConfig: CONTRACT_CONFIGS[environment] || LOCAL_DEV_CONFIG
+    contractConfig: CONTRACT_CONFIGS[environment] || LOCAL_DEV_CONFIG,
+    hybridConfig: {
+      // Sprint 9: Only staking module uses real contracts
+      useRealStaking: true,
+      useRealDonations: false,
+      useRealRewards: false,
+      useRealToken: false
+    }
   };
 }
 

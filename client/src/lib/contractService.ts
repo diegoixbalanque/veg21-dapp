@@ -584,6 +584,31 @@ class ContractService implements IContractService {
       this.token = new MockToken('mock://token', []);
       
       console.log('Contract service initialized in MOCK mode');
+    } else if (this.config.mode === ServiceMode.HYBRID) {
+      // Hybrid mode: Mix of real and mock implementations based on configuration
+      const contractConfig = this.config.contractConfig!;
+      const hybridConfig = this.config.hybridConfig!;
+      
+      // Initialize modules based on hybrid configuration
+      this.staking = hybridConfig.useRealStaking 
+        ? new ContractStaking(contractConfig.addresses.staking, StakingABI.abi)
+        : new MockStaking('mock://staking', []);
+        
+      this.donations = hybridConfig.useRealDonations
+        ? new ContractDonations(contractConfig.addresses.donations, DonationsABI.abi)
+        : new MockDonations('mock://donations', []);
+        
+      this.rewards = hybridConfig.useRealRewards
+        ? new ContractRewards(contractConfig.addresses.rewards, RewardsABI.abi)
+        : new MockRewards('mock://rewards', []);
+        
+      this.token = hybridConfig.useRealToken
+        ? new ContractToken(contractConfig.addresses.token, TokenABI.abi)
+        : new MockToken('mock://token', []);
+      
+      console.log('Contract service initialized in HYBRID mode');
+      console.log('Hybrid configuration:', hybridConfig);
+      console.log('Using real contracts for:', Object.entries(hybridConfig).filter(([_, useReal]) => useReal).map(([key]) => key));
     } else {
       // Use real contract implementations
       const contractConfig = this.config.contractConfig!;
@@ -604,6 +629,29 @@ class ContractService implements IContractService {
     if (this.config.mode === ServiceMode.MOCK) {
       // Initialize mock service
       await mockWeb3Service.initialize(walletAddress);
+    } else if (this.config.mode === ServiceMode.HYBRID) {
+      // Initialize mock service for persistence and shared state
+      await mockWeb3Service.initialize(walletAddress);
+      
+      // Initialize only real contracts that are enabled in hybrid mode
+      const initPromises = [];
+      const hybridConfig = this.config.hybridConfig!;
+      
+      if (hybridConfig.useRealStaking) {
+        initPromises.push(this.staking.initialize());
+      }
+      if (hybridConfig.useRealDonations) {
+        initPromises.push(this.donations.initialize());
+      }
+      if (hybridConfig.useRealRewards) {
+        initPromises.push(this.rewards.initialize());
+      }
+      if (hybridConfig.useRealToken) {
+        initPromises.push(this.token.initialize());
+      }
+      
+      await Promise.all(initPromises);
+      console.log('Hybrid mode: Initialized both mock and real contract services');
     } else {
       // Initialize real contracts
       await Promise.all([
