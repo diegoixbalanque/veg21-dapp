@@ -26,18 +26,31 @@ export interface ContributionRecord {
   txHash: string; // Mock transaction hash
 }
 
+export interface StakeRecord {
+  id: string;
+  amount: number;
+  stakedAt: Date;
+  unstakedAt?: Date;
+  isActive: boolean;
+  rewardsEarned: number;
+  txHash: string;
+}
+
 export interface MockWeb3State {
   isInitialized: boolean;
   balance: TokenBalance;
   rewards: ClaimableReward[];
   contributions: ContributionRecord[];
+  stakes: StakeRecord[];
   totalEarned: number;
   totalContributed: number;
+  totalStaked: number;
+  totalStakingRewards: number;
 }
 
 export interface MockTransaction {
   id: string;
-  type: 'claim_reward' | 'contribute' | 'transfer';
+  type: 'claim_reward' | 'contribute' | 'transfer' | 'stake_tokens' | 'unstake_tokens';
   amount: number;
   status: 'pending' | 'confirmed' | 'failed';
   timestamp: Date;
@@ -133,6 +146,11 @@ class MockWeb3Service {
           ...contribution,
           timestamp: new Date(contribution.timestamp)
         })) || [];
+        parsed.stakes = parsed.stakes?.map((stake: any) => ({
+          ...stake,
+          stakedAt: new Date(stake.stakedAt),
+          unstakedAt: stake.unstakedAt ? new Date(stake.unstakedAt) : undefined
+        })) || [];
         return parsed;
       }
     } catch (error) {
@@ -145,8 +163,11 @@ class MockWeb3Service {
       balance: { veg21: 0, astr: 0 },
       rewards: [],
       contributions: [],
+      stakes: [],
       totalEarned: 0,
-      totalContributed: 0
+      totalContributed: 0,
+      totalStaked: 0,
+      totalStakingRewards: 0
     };
   }
 
@@ -386,6 +407,130 @@ class MockWeb3Service {
     return [...this.transactions];
   }
 
+  // Stake tokens for rewards
+  async stakeTokens(amount: number): Promise<MockTransaction> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (amount <= 0) {
+          reject(new Error('El monto debe ser mayor a 0'));
+          return;
+        }
+
+        if (this.state.balance.veg21 < amount) {
+          reject(new Error('Saldo insuficiente para apostar'));
+          return;
+        }
+
+        // Deduct from balance
+        this.state.balance.veg21 -= amount;
+        this.state.totalStaked += amount;
+
+        // Create stake record
+        const stake: StakeRecord = {
+          id: `stake_${Date.now()}`,
+          amount,
+          stakedAt: new Date(),
+          isActive: true,
+          rewardsEarned: 0,
+          txHash: this.generateTxHash()
+        };
+
+        // Create transaction record
+        const transaction: MockTransaction = {
+          id: `stake_tx_${Date.now()}`,
+          type: 'stake_tokens',
+          amount,
+          status: 'confirmed',
+          timestamp: new Date(),
+          txHash: stake.txHash
+        };
+
+        this.state.stakes.push(stake);
+        this.transactions.push(transaction);
+
+        this.saveStateToStorage();
+        this.saveTransactionsToStorage();
+
+        this.emit('balance_updated', this.state.balance);
+        this.emit('state_changed', this.state);
+
+        resolve(transaction);
+      }, 2000);
+    });
+  }
+
+  // Unstake tokens and claim rewards
+  async unstakeTokens(stakeId: string): Promise<MockTransaction> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const stake = this.state.stakes.find(s => s.id === stakeId && s.isActive);
+        
+        if (!stake) {
+          reject(new Error('Apuesta no encontrada o ya retirada'));
+          return;
+        }
+
+        // Calculate staking rewards (5% APY, pro-rated for time staked)
+        const stakingDurationMs = Date.now() - stake.stakedAt.getTime();
+        const stakingDurationDays = stakingDurationMs / (1000 * 60 * 60 * 24);
+        const annualRewardRate = 0.05; // 5% APY
+        const rewardsEarned = stake.amount * (annualRewardRate * stakingDurationDays / 365);
+
+        // Mark stake as inactive
+        stake.isActive = false;
+        stake.unstakedAt = new Date();
+        stake.rewardsEarned = rewardsEarned;
+
+        // Return staked amount plus rewards
+        const totalReturn = stake.amount + rewardsEarned;
+        this.state.balance.veg21 += totalReturn;
+        this.state.totalStaked -= stake.amount;
+        this.state.totalStakingRewards += rewardsEarned;
+        this.state.totalEarned += rewardsEarned;
+
+        // Create transaction record
+        const transaction: MockTransaction = {
+          id: `unstake_tx_${Date.now()}`,
+          type: 'unstake_tokens',
+          amount: totalReturn,
+          status: 'confirmed',
+          timestamp: new Date(),
+          txHash: this.generateTxHash()
+        };
+
+        this.transactions.push(transaction);
+
+        this.saveStateToStorage();
+        this.saveTransactionsToStorage();
+
+        this.emit('balance_updated', this.state.balance);
+        this.emit('state_changed', this.state);
+
+        resolve(transaction);
+      }, 2000);
+    });
+  }
+
+  // Get active stakes
+  getActiveStakes(): StakeRecord[] {
+    return this.state.stakes.filter(stake => stake.isActive);
+  }
+
+  // Get all stakes (including inactive)
+  getAllStakes(): StakeRecord[] {
+    return [...this.state.stakes];
+  }
+
+  // Get total staked amount
+  getTotalStaked(): number {
+    return this.state.totalStaked;
+  }
+
+  // Get total staking rewards earned
+  getTotalStakingRewards(): number {
+    return this.state.totalStakingRewards;
+  }
+
   // Reset all data (for testing/demo purposes)
   reset(): void {
     localStorage.removeItem(STORAGE_KEYS.WEB3_STATE);
@@ -395,8 +540,11 @@ class MockWeb3Service {
       balance: { veg21: 0, astr: 0 },
       rewards: [],
       contributions: [],
+      stakes: [],
       totalEarned: 0,
-      totalContributed: 0
+      totalContributed: 0,
+      totalStaked: 0,
+      totalStakingRewards: 0
     };
     this.transactions = [];
     this.initializeDefaultRewards();
