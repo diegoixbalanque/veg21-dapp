@@ -10,6 +10,8 @@ VEG21 is a blockchain-based web application that gamifies vegan lifestyle adopti
 
 **Sprint 7 Completed** (September 2025): Community Feed & Recipe Sharing feature implemented with comprehensive post creation system, engagement features (likes, comments), content filtering, and localStorage data persistence. Enhanced wallet connection state management for improved reactivity and testing compatibility.
 
+**Sprint 2 Completed** (October 2025): Enhanced Onboarding & Challenge Flow with user registration system, daily check-ins with photo/video proof upload, community validation, +50 VEG21 completion bonus, and full leaderboard integration. All features tested and verified working including data persistence, registration rehydration, and community interactions.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -70,6 +72,21 @@ Preferred communication style: Simple, everyday language.
 - **Data Persistence**: Complete localStorage integration for posts, likes, comments, and user interactions with `veg21_` prefix consistency
 - **Responsive Design**: Mobile-optimized layout with sidebar statistics, modal forms, and touch-friendly interactions
 - **Wallet Integration Enhancement**: Improved wallet state reactivity with localStorage synchronization for better testing and user experience
+
+### Enhanced Onboarding & Challenge Flow (Sprint 2)
+- **Multi-Step Registration Form**: Two-step onboarding collecting name, email, location, and dietary preference before challenge selection
+- **User Data Management**: Complete registration data stored in localStorage with privacy-focused approach
+- **Daily Check-In System**: Photo/video proof upload modal (mock implementation) for daily progress tracking
+- **Community Validation**: Like and approval system for daily check-ins with engagement tracking
+- **Check-In Feed**: Dedicated section in profile page displaying all user check-ins with community interaction
+- **Mock Media Upload**: Simulated photo/video upload with placeholder images from Unsplash
+- **Proof of Action Flow**: Complete system for users to document daily vegan habits with visual proof
+- **Completion Detection**: Automatic detection of 21-day challenge completion with +50 VEG21 completion bonus
+- **Token Rewards**: Simple +50 VEG21 token completion bonus automatically awarded and tracked via localStorage
+- **Leaderboard Integration**: Automatic update of global leaderboard rankings based on earned tokens from challenges
+- **Data Persistence**: localStorage integration for check-ins, interactions (likes/approvals), and comments
+- **Visual Feedback**: Enhanced UI with camera icons, progress indicators, and community validation badges
+- **Mobile-Optimized**: Responsive design for check-in modal and feed display on all devices
 
 ### State Management
 - **React Query**: Server state caching and synchronization

@@ -10,6 +10,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Header } from "@/components/header";
 import { getUserChallenge, getChallengeProgress, updateChallengeProgress, Challenge } from "@/components/onboarding-modal";
 import { 
+  DailyCheckInModal, 
+  CheckInList, 
+  getUserCheckIns, 
+  likeCheckIn, 
+  approveCheckIn,
+  type DailyCheckIn 
+} from "@/components/daily-check-in";
+import { 
   User, 
   Edit3, 
   Save, 
@@ -25,9 +33,10 @@ import {
   Clock,
   Wallet,
   Plus,
-  Minus
+  Minus,
+  Camera
 } from "lucide-react";
-import { formatTokenAmount } from "@/lib/mockWeb3";
+import { formatTokenAmount, mockWeb3Service } from "@/lib/mockWeb3";
 
 const USERNAME_STORAGE_KEY = 'veg21_username';
 
@@ -54,6 +63,10 @@ export default function Profile() {
   const [stakeAmount, setStakeAmount] = useState('');
   const [isStaking, setIsStaking] = useState(false);
   const [showStakingDetails, setShowStakingDetails] = useState(false);
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<number>(1);
+  const [userCheckIns, setUserCheckIns] = useState<DailyCheckIn[]>([]);
+  const [refreshCheckIns, setRefreshCheckIns] = useState(0);
 
   // Load user data on component mount
   useEffect(() => {
@@ -88,7 +101,57 @@ export default function Profile() {
     
     setCurrentChallenge(challenge);
     setChallengeProgress(progress);
+
+    // Load user check-ins
+    if (formattedAddress) {
+      const checkIns = getUserCheckIns(formattedAddress);
+      setUserCheckIns(checkIns);
+    }
   };
+
+  // Reload check-ins when refreshCheckIns changes
+  useEffect(() => {
+    if (formattedAddress) {
+      const checkIns = getUserCheckIns(formattedAddress);
+      setUserCheckIns(checkIns);
+    }
+  }, [refreshCheckIns, formattedAddress]);
+
+  // Check for challenge completion and award +50 token completion bonus
+  useEffect(() => {
+    if (challengeProgress && challengeProgress.completedDays.length === 21 && mockWeb3.isInitialized) {
+      const completionBonusKey = 'veg21_completion_bonus_claimed';
+      const alreadyClaimed = localStorage.getItem(completionBonusKey);
+      
+      if (!alreadyClaimed) {
+        const completionBonus = 50;
+        
+        // Add completion bonus to localStorage-tracked earnings
+        const bonusData = {
+          amount: completionBonus,
+          claimed: true,
+          claimedAt: new Date().toISOString()
+        };
+        localStorage.setItem(completionBonusKey, JSON.stringify(bonusData));
+        
+        // Show success notification
+        setTimeout(() => {
+          if (typeof window !== 'undefined') {
+            const event = new CustomEvent('show-completion-celebration', {
+              detail: {
+                message: `¡Felicidades! Has completado el desafío de 21 días vegano y ganado un bono de +${completionBonus} VEG21 tokens! 🎉`,
+                tokens: completionBonus
+              }
+            });
+            window.dispatchEvent(event);
+          }
+        }, 500);
+        
+        // Refresh user data
+        setTimeout(() => loadUserData(), 1000);
+      }
+    }
+  }, [challengeProgress?.completedDays.length, mockWeb3.isInitialized]);
 
   const saveUsername = () => {
     try {
@@ -120,8 +183,23 @@ export default function Profile() {
       };
     }
 
+    // Include +50 completion bonus in total earned if claimed
+    let totalEarned = mockWeb3.totalEarned;
+    const completionBonusKey = 'veg21_completion_bonus_claimed';
+    const bonusData = localStorage.getItem(completionBonusKey);
+    if (bonusData) {
+      try {
+        const bonus = JSON.parse(bonusData);
+        if (bonus.claimed && bonus.amount) {
+          totalEarned += bonus.amount;
+        }
+      } catch (error) {
+        console.error('Failed to parse completion bonus data:', error);
+      }
+    }
+
     return {
-      tokensEarned: mockWeb3.totalEarned,
+      tokensEarned: totalEarned,
       challengesCompleted: (challengeProgress?.completedDays?.length || 0) >= 21 ? 1 : 0,
       tokensDonated: mockWeb3.totalContributed,
       tokensStaked: mockWeb3.totalStaked
@@ -194,6 +272,35 @@ export default function Profile() {
       console.error('Failed to stake tokens:', error);
     } finally {
       setIsStaking(false);
+    }
+  };
+
+  const handleOpenCheckIn = (day: number) => {
+    setSelectedDay(day);
+    setShowCheckInModal(true);
+  };
+
+  const handleCheckInComplete = (checkIn: DailyCheckIn) => {
+    // Mark the day as completed
+    if (challengeProgress && !challengeProgress.completedDays.includes(checkIn.day)) {
+      updateChallengeProgress(checkIn.day, true);
+    }
+    // Refresh check-ins and challenge data
+    setRefreshCheckIns(prev => prev + 1);
+    loadUserData();
+  };
+
+  const handleLikeCheckIn = (checkInId: string) => {
+    if (formattedAddress) {
+      likeCheckIn(checkInId, formattedAddress);
+      setRefreshCheckIns(prev => prev + 1);
+    }
+  };
+
+  const handleApproveCheckIn = (checkInId: string) => {
+    if (formattedAddress) {
+      approveCheckIn(checkInId, formattedAddress);
+      setRefreshCheckIns(prev => prev + 1);
     }
   };
 
@@ -349,12 +456,12 @@ export default function Profile() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => markDayCompleted(challengeProgress.currentDay)}
-                      className="bg-veg-primary hover:bg-veg-secondary"
-                      data-testid="button-mark-day-completed"
+                      onClick={() => handleOpenCheckIn(challengeProgress.currentDay)}
+                      className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary"
+                      data-testid="button-daily-checkin"
                     >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Marcar como completado
+                      <Camera className="w-4 h-4 mr-2" />
+                      Check-in Diario
                     </Button>
                   </div>
                 )}
@@ -540,6 +647,29 @@ export default function Profile() {
             </CardContent>
           </Card>
 
+          {/* Daily Check-ins Section */}
+          {currentChallenge && challengeProgress && challengeProgress.isActive && (
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm" data-testid="card-check-ins">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Camera className="w-5 h-5 text-veg-primary" />
+                  <span>Mis Check-ins Diarios</span>
+                </CardTitle>
+                <CardDescription>
+                  Comparte tu progreso y gana validación de la comunidad
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CheckInList
+                  checkIns={userCheckIns}
+                  currentUserId={formattedAddress || ''}
+                  onLike={handleLikeCheckIn}
+                  onApprove={handleApproveCheckIn}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Empty State for New Users */}
           {!currentChallenge && (
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm text-center py-12" data-testid="card-no-challenge">
@@ -557,6 +687,14 @@ export default function Profile() {
           )}
         </div>
       </div>
+
+      {/* Daily Check-in Modal */}
+      <DailyCheckInModal
+        isOpen={showCheckInModal}
+        onClose={() => setShowCheckInModal(false)}
+        day={selectedDay}
+        onCheckInComplete={handleCheckInComplete}
+      />
     </div>
   );
 }
