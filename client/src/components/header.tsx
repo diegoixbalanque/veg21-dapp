@@ -1,14 +1,17 @@
-import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink, Coins, Trophy, Home, User, Users } from "lucide-react";
+import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink, Coins, Trophy, Home, User, Users, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/hooks/use-wallet";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { formatTokenAmount } from "@/lib/mockWeb3";
 import { Link, useLocation } from "wouter";
 import { DemoWalletButton } from "@/components/demo-wallet-button";
+import { DEFAULT_NETWORK } from "@/config/chainConfig";
+import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
   const { isConnected, isConnecting, connectWallet, disconnectWallet, formattedAddress, error, retryConnection, clearError, mockWeb3, isDemoMode } = useWallet();
   const [location] = useLocation();
+  const { toast } = useToast();
 
   const handleWalletClick = async () => {
     if (isConnected) {
@@ -25,6 +28,26 @@ export function Header() {
   
   const handleRetryClick = async () => {
     await retryConnection();
+  };
+
+  const handleSwitchNetwork = () => {
+    // Non-functional for Sprint 4 - will be implemented in Milestone 2
+    toast({
+      title: "Función próximamente",
+      description: "El cambio de red estará disponible en Milestone 2 cuando se desplieguen los contratos en Celo Alfajores.",
+      duration: 4000,
+    });
+  };
+
+  // Get network display name based on current mode
+  const getNetworkDisplayName = () => {
+    const mode = import.meta.env.VITE_VEG21_MODE || 'demo';
+    
+    if (isDemoMode || mode === 'demo' || mode === 'mock') {
+      return 'Modo Demo';
+    }
+    
+    return DEFAULT_NETWORK.displayName;
   };
 
   return (
@@ -108,12 +131,24 @@ export function Header() {
             
             <div className="flex items-center space-x-4">
               {isConnected && (
-                <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${isDemoMode ? 'bg-purple-50' : 'bg-green-50'}`}>
-                  <div className={`w-2 h-2 rounded-full animate-pulse ${isDemoMode ? 'bg-purple-500' : 'bg-veg-primary'}`}></div>
-                  <span className={`text-sm font-medium ${isDemoMode ? 'text-purple-700' : 'text-veg-secondary'}`}>
-                    {isDemoMode ? 'Demo Network' : 'Astar Network'}
-                  </span>
-                </div>
+                <>
+                  <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${isDemoMode ? 'bg-purple-50' : 'bg-green-50'}`}>
+                    <div className={`w-2 h-2 rounded-full animate-pulse ${isDemoMode ? 'bg-purple-500' : 'bg-veg-primary'}`}></div>
+                    <span className={`text-sm font-medium ${isDemoMode ? 'text-purple-700' : 'text-veg-secondary'}`}>
+                      {getNetworkDisplayName()}
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSwitchNetwork}
+                    className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                    data-testid="button-switch-network"
+                  >
+                    <Network className="w-4 h-4 mr-2" />
+                    Cambiar Red
+                  </Button>
+                </>
               )}
               
               {/* Token Balance Display */}
