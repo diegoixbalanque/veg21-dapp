@@ -12,6 +12,8 @@ VEG21 is a blockchain-based web application that gamifies vegan lifestyle adopti
 
 **Sprint 2 Completed** (October 2025): Enhanced Onboarding & Challenge Flow with user registration system, daily check-ins with photo/video proof upload, community validation, +50 VEG21 completion bonus, and full leaderboard integration. All features tested and verified working including data persistence, registration rehydration, and community interactions.
 
+**Sprint 3 Completed** (October 2025): Token Simulation Layer & Transaction Feed with complete transaction history tracking, peer-to-peer VEG21 token transfers, and community activity feed showing real-time token-related actions. Features include Transaction History component on profile page, Send VEG21 modal for simulated transfers with balance validation, and enhanced Community Activity Feed displaying all transaction types (claims, transfers, donations, staking). All components fully integrated with localStorage persistence and end-to-end tested.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -87,6 +89,21 @@ Preferred communication style: Simple, everyday language.
 - **Data Persistence**: localStorage integration for check-ins, interactions (likes/approvals), and comments
 - **Visual Feedback**: Enhanced UI with camera icons, progress indicators, and community validation badges
 - **Mobile-Optimized**: Responsive design for check-in modal and feed display on all devices
+
+### Token Simulation & Transaction System (Sprint 3)
+- **Transaction History Component**: Comprehensive transaction tracking displaying all token events (claims, transfers, stakes, donations) with type-specific icons and color-coded badges
+- **Transaction Types Supported**: claim_reward, contribute, transfer, send, receive, stake_tokens, unstake_tokens
+- **Peer-to-Peer Token Transfers**: Send VEG21 modal with recipient address validation, amount validation, and real-time balance updates
+- **Transaction Storage**: All transactions persisted in localStorage under `veg21_mock_transactions` with complete transaction metadata
+- **Community Activity Feed Integration**: Real-time feed displaying token-related activities from all users including transfers, donations, claims, and check-ins
+- **Activity Feed Features**: User avatars, relative timestamps, amount badges, sender/recipient address display (shortened format), activity type icons
+- **Balance Management**: Automatic balance updates after each transaction with event emission for reactive UI updates
+- **Data Flow**: Send VEG21 Modal → mockWeb3.transferTokens() → localStorage → Transaction History + Community Activity Feed
+- **Transfer Validation**: Prevents sending more than available balance, validates recipient address format, provides user feedback via toasts
+- **Profile Page Integration**: Transaction History section with "Enviar VEG21" button below daily check-ins
+- **Community Page Integration**: Activity feed in sidebar below filters showing all community token activities
+- **Testing Coverage**: End-to-end Playwright tests verifying complete transaction flow from send modal to community feed display
+- **Mock Transaction Interface**: Extended with 'to' and 'from' fields for tracking transfer parties, 'challengeDay' for reward context
 
 ### State Management
 - **React Query**: Server state caching and synchronization
