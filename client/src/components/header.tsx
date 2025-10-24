@@ -41,12 +41,8 @@ export function Header() {
 
   // Get network display name based on current mode
   const getNetworkDisplayName = () => {
-    const mode = import.meta.env.VITE_VEG21_MODE || 'demo';
-    
-    if (isDemoMode || mode === 'demo' || mode === 'mock') {
-      return 'Modo Demo';
-    }
-    
+    // Always use the network display name from chainConfig
+    // This automatically reflects the current VEG21_MODE setting
     return DEFAULT_NETWORK.displayName;
   };
 
@@ -63,7 +59,7 @@ export function Header() {
                   </div>
                   <div>
                     <h1 className="text-xl font-bold text-veg-dark">VEG21</h1>
-                    <p className="text-xs text-gray-600">Astar Network</p>
+                    <p className="text-xs text-gray-600">{DEFAULT_NETWORK.displayName}</p>
                   </div>
                 </div>
               </Link>

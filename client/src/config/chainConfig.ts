@@ -64,11 +64,46 @@ export const ASTAR_SHIBUYA: ChainConfig = {
   isTestnet: true
 };
 
+// Local Hardhat Network Configuration (for local development)
+export const LOCAL_HARDHAT: ChainConfig = {
+  chainId: 31337,
+  chainIdHex: '0x7a69',
+  name: 'local',
+  displayName: 'Local Network',
+  rpcUrl: 'http://127.0.0.1:8545',
+  blockExplorer: '',
+  nativeCurrency: {
+    name: 'Ethereum',
+    symbol: 'ETH',
+    decimals: 18
+  },
+  isTestnet: true
+};
+
+// Demo Mode Configuration (simulated blockchain)
+export const DEMO_MODE: ChainConfig = {
+  chainId: 31337,
+  chainIdHex: '0x7a69',
+  name: 'demo',
+  displayName: 'Modo Demo',
+  rpcUrl: '',
+  blockExplorer: '',
+  nativeCurrency: {
+    name: 'VEG21',
+    symbol: 'VEG21',
+    decimals: 18
+  },
+  isTestnet: true
+};
+
 // Network registry
 export const SUPPORTED_NETWORKS: Record<string, ChainConfig> = {
   'celo-alfajores': CELO_ALFAJORES,
   'celo': CELO_MAINNET,
-  'astar-shibuya': ASTAR_SHIBUYA
+  'astar-shibuya': ASTAR_SHIBUYA,
+  'local': LOCAL_HARDHAT,
+  'demo': DEMO_MODE,
+  'mock': DEMO_MODE
 };
 
 // Get network configuration by chain ID
@@ -122,9 +157,14 @@ export function getDefaultNetwork(): ChainConfig {
       return ASTAR_SHIBUYA;
     case 'celo-mainnet':
       return CELO_MAINNET;
+    case 'local':
+      return LOCAL_HARDHAT;
+    case 'demo':
+    case 'mock':
+      return DEMO_MODE;
     default:
-      // In demo mode, return Celo Alfajores as the target network for future migration
-      return CELO_ALFAJORES;
+      // Default to demo mode for unknown configurations
+      return DEMO_MODE;
   }
 }
 

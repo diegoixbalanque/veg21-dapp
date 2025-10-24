@@ -1,147 +1,76 @@
 # VEG21 - Vegan Habit Tracker
 
 ## Overview
-
-VEG21 is a blockchain-based web application that gamifies vegan lifestyle adoption through 21-day challenges. Users participate in vegan habit-building challenges, contribute to community causes, and earn cryptocurrency rewards. The platform combines habit tracking, social impact, and decentralized finance to create an engaging ecosystem for promoting veganism and environmental sustainability.
-
-**Sprint 5 Completed** (September 2025): Global Impact Leaderboard feature implemented with user ranking system, community impact metrics, navigation integration, and localStorage persistence.
-
-**Sprint 6 Completed** (September 2025): User Profile & Onboarding Flow implemented with welcome modal for first-time users, challenge selection system, editable user profiles, gamification elements, and complete navigation integration.
-
-**Sprint 7 Completed** (September 2025): Community Feed & Recipe Sharing feature implemented with comprehensive post creation system, engagement features (likes, comments), content filtering, and localStorage data persistence. Enhanced wallet connection state management for improved reactivity and testing compatibility.
-
-**Sprint 2 Completed** (October 2025): Enhanced Onboarding & Challenge Flow with user registration system, daily check-ins with photo/video proof upload, community validation, +50 VEG21 completion bonus, and full leaderboard integration. All features tested and verified working including data persistence, registration rehydration, and community interactions.
-
-**Sprint 3 Completed** (October 2025): Token Simulation Layer & Transaction Feed with complete transaction history tracking, peer-to-peer VEG21 token transfers, and community activity feed showing real-time token-related actions. Features include Transaction History component on profile page, Send VEG21 modal for simulated transfers with balance validation, and enhanced Community Activity Feed displaying all transaction types (claims, transfers, donations, staking). All components fully integrated with localStorage persistence and end-to-end tested.
+VEG21 is a blockchain-based web application designed to promote and gamify vegan lifestyle adoption through 21-day challenges. It integrates habit tracking, social impact, and cryptocurrency rewards (VEG21 tokens) to create an engaging ecosystem. The platform enables users to participate in vegan challenges, contribute to community causes, and earn rewards, fostering environmental sustainability and a growing vegan community. Key features include a global impact leaderboard, user profiles, onboarding flows, community feed with recipe sharing, daily check-ins with proof upload, and a token simulation layer with transaction tracking, all preparing for Celo Testnet integration.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
-- **React + TypeScript**: Component-based UI with type safety
-- **Vite**: Fast development server and build tool optimized for modern web development
-- **Wouter**: Lightweight client-side routing solution
-- **Tailwind CSS**: Utility-first CSS framework for rapid UI development
-- **Shadcn/ui**: High-quality React component library built on Radix UI primitives
-- **TanStack Query**: Server state management for API calls and caching
+### Core Technologies
+- **Frontend**: React, TypeScript, Vite, Wouter (routing), Tailwind CSS, Shadcn/ui (component library), TanStack Query (server state).
+- **Backend**: Express.js with TypeScript, modular storage interface, middleware pipeline.
+- **Database**: Drizzle ORM with PostgreSQL dialect, schema-first approach, migration support.
 
-### Backend Architecture
-- **Express.js**: RESTful API server with TypeScript support
-- **Modular Storage Interface**: Abstracted storage layer supporting both in-memory and database implementations
-- **Middleware Pipeline**: Request logging, JSON parsing, and error handling
-- **Development Server**: Hot-reload enabled development environment with Vite integration
+### UI/UX and Design
+- **Styling**: Tailwind CSS, Shadcn/ui, responsive design (mobile-first), custom vegan-themed color palette, CSS custom properties for theming.
+- **Components**: High-quality, accessible React components built on Radix UI.
+- **Visuals**: Crown/medal icons for leaderboard, custom avatars, progress bars, milestone badges, camera icons for proof uploads.
 
-### Database Design
-- **Drizzle ORM**: Type-safe database toolkit with PostgreSQL dialect
-- **Schema-First Approach**: Database schema defined in TypeScript with automatic type inference
-- **Migration Support**: Database versioning through Drizzle Kit
-- **User Entity**: Simple user model with username/password authentication
+### Feature Specifications
+- **Leaderboard System**: Global ranking based on VEG21 tokens earned, donations, and staking rewards; community impact metrics dashboard; localStorage persistence.
+- **User Profile & Onboarding**: Multi-step onboarding with challenge selection (meat-free, vegan breakfasts, full vegan, zero waste); editable user profiles with challenge progress, personal statistics, and gamification elements (badges); localStorage persistence.
+- **Community Feed & Recipe Sharing**: Multi-type content system (recipes, tips, experiences) with forms; engagement features (likes, comments); content filtering; real-time community statistics; localStorage persistence.
+- **Enhanced Onboarding & Challenge Flow**: User registration, daily check-ins with photo/video proof upload (mock), community validation for check-ins, automatic 21-day challenge completion detection with +50 VEG21 bonus, leaderboard integration; localStorage persistence.
+- **Token Simulation & Transaction System**: Comprehensive transaction history (claims, transfers, donations, staking); peer-to-peer VEG21 token transfers with balance validation; community activity feed displaying real-time token events; localStorage persistence for transactions.
 
-### Styling and UI System
-- **Design System**: Consistent theming with CSS custom properties
-- **Component Variants**: Class Variance Authority for component styling variations
-- **Responsive Design**: Mobile-first approach with Tailwind breakpoints
-- **Custom Color Palette**: Vegan-themed color scheme with gradients
-
-### Leaderboard System (Sprint 5)
-- **Global Impact Ranking**: User ranking system based on total VEG21 tokens earned, donations contributed, and staking rewards
-- **Community Impact Metrics**: Dashboard displaying total tokens distributed, donated, staked, and active users
-- **Visual Recognition System**: Crown/medal icons for top 3 performers, special "Tú" badge for current user
-- **Data Integration**: Combines real user statistics from mockWeb3 with mock user data for realistic leaderboard experience
-- **Navigation System**: Integrated header navigation with active state highlighting
-- **Data Persistence**: localStorage integration for maintaining leaderboard state across sessions
-
-### User Profile & Onboarding System (Sprint 6)
-- **Welcome Onboarding Flow**: First-time user modal with 4 challenge options (meat-free, vegan breakfasts, full vegan, zero waste)
-- **Challenge Selection System**: 21-day challenges with difficulty levels, estimated rewards, and localStorage persistence
-- **User Profile Page**: Complete profile with avatar generation, editable username, challenge progress tracking
-- **Gamification Elements**: Progress bars, milestone badges (7-day, 14-day, completion), day completion tracking
-- **Personal Statistics Dashboard**: Integration with mockWeb3 for tokens earned, challenges completed, donations, staking
-- **Navigation Enhancement**: Extended header navigation with Home, Leaderboard, and Profile links
-- **Data Persistence**: localStorage for onboarding status, challenge progress, username, and user preferences
-
-### Community Feed & Recipe Sharing System (Sprint 7)
-- **Community Data Service**: Comprehensive localStorage-based data management for posts, interactions, and statistics
-- **Multi-Type Content System**: Support for recipes, tips, and personal experiences with specialized forms and display
-- **Recipe Sharing Platform**: Detailed recipe form with ingredients, preparation steps, and mock image upload support
-- **Engagement Features**: Like/unlike functionality, nested comment system with real-time updates, and user interaction tracking
-- **Content Discovery**: Advanced filtering system (all, recipes, tips, experiences) with dynamic post counting
-- **Social Features**: User avatars, author attribution, relative timestamps, and "you" badges for current user identification
-- **Community Statistics**: Real-time stats dashboard showing total posts, content type breakdown, and engagement metrics
-- **Data Persistence**: Complete localStorage integration for posts, likes, comments, and user interactions with `veg21_` prefix consistency
-- **Responsive Design**: Mobile-optimized layout with sidebar statistics, modal forms, and touch-friendly interactions
-- **Wallet Integration Enhancement**: Improved wallet state reactivity with localStorage synchronization for better testing and user experience
-
-### Enhanced Onboarding & Challenge Flow (Sprint 2)
-- **Multi-Step Registration Form**: Two-step onboarding collecting name, email, location, and dietary preference before challenge selection
-- **User Data Management**: Complete registration data stored in localStorage with privacy-focused approach
-- **Daily Check-In System**: Photo/video proof upload modal (mock implementation) for daily progress tracking
-- **Community Validation**: Like and approval system for daily check-ins with engagement tracking
-- **Check-In Feed**: Dedicated section in profile page displaying all user check-ins with community interaction
-- **Mock Media Upload**: Simulated photo/video upload with placeholder images from Unsplash
-- **Proof of Action Flow**: Complete system for users to document daily vegan habits with visual proof
-- **Completion Detection**: Automatic detection of 21-day challenge completion with +50 VEG21 completion bonus
-- **Token Rewards**: Simple +50 VEG21 token completion bonus automatically awarded and tracked via localStorage
-- **Leaderboard Integration**: Automatic update of global leaderboard rankings based on earned tokens from challenges
-- **Data Persistence**: localStorage integration for check-ins, interactions (likes/approvals), and comments
-- **Visual Feedback**: Enhanced UI with camera icons, progress indicators, and community validation badges
-- **Mobile-Optimized**: Responsive design for check-in modal and feed display on all devices
-
-### Token Simulation & Transaction System (Sprint 3)
-- **Transaction History Component**: Comprehensive transaction tracking displaying all token events (claims, transfers, stakes, donations) with type-specific icons and color-coded badges
-- **Transaction Types Supported**: claim_reward, contribute, transfer, send, receive, stake_tokens, unstake_tokens
-- **Peer-to-Peer Token Transfers**: Send VEG21 modal with recipient address validation, amount validation, and real-time balance updates
-- **Transaction Storage**: All transactions persisted in localStorage under `veg21_mock_transactions` with complete transaction metadata
-- **Community Activity Feed Integration**: Real-time feed displaying token-related activities from all users including transfers, donations, claims, and check-ins
-- **Activity Feed Features**: User avatars, relative timestamps, amount badges, sender/recipient address display (shortened format), activity type icons
-- **Balance Management**: Automatic balance updates after each transaction with event emission for reactive UI updates
-- **Data Flow**: Send VEG21 Modal → mockWeb3.transferTokens() → localStorage → Transaction History + Community Activity Feed
-- **Transfer Validation**: Prevents sending more than available balance, validates recipient address format, provides user feedback via toasts
-- **Profile Page Integration**: Transaction History section with "Enviar VEG21" button below daily check-ins
-- **Community Page Integration**: Activity feed in sidebar below filters showing all community token activities
-- **Testing Coverage**: End-to-end Playwright tests verifying complete transaction flow from send modal to community feed display
-- **Mock Transaction Interface**: Extended with 'to' and 'from' fields for tracking transfer parties, 'challengeDay' for reward context
+### Blockchain and Web3 Integration (Sprint 4 - Milestone 2 Preparation)
+- **Celo Testnet Preparation**: Multi-network configuration system supporting Celo Alfajores (chainId 44787), Astar Shibuya (chainId 81), local Hardhat (chainId 31337), and Demo mode with environment-based switching via VEG21_MODE variable.
+- **Network Configuration**: Centralized configuration in `client/src/config/chainConfig.ts` with NetworkConfig interface defining chainId, name, displayName, RPC URL, block explorer, native currency, and testnet flag for each supported network.
+- **Token Contract (Placeholder)**: ERC20 VEG21Token smart contract (`contracts/VEG21TokenMock.sol`) with:
+  - Standard ERC20 implementation (transfer, approve, transferFrom, balanceOf, totalSupply)
+  - Minting capabilities with authorized minter system for rewards contracts
+  - Burning mechanism for donations and charity contributions
+  - Owner-controlled minter management prepared for VEG21Staking and VEG21Rewards contracts
+  - Comprehensive deployment notes for Milestone 2 Celo Alfajores deployment
+  - Token economics: 18 decimals, configurable initial supply, integration points documented
+- **Wallet Integration**: MetaMask connection for real blockchain; demo wallet mode with localStorage simulation; enhanced wallet connection state management with purple UI indicators for demo mode.
+- **Dynamic Network Display**: Header component displays current network name from chainConfig based on VEG21_MODE (Celo Alfajores, Astar Shibuya, Local Network, or Demo Mode).
+- **Switch Network Button**: Non-functional UI button in Header showing informational toast ("Función próximamente - disponible en Milestone 2") preparing for future network switching feature.
+- **Hybrid Architecture**: Current mockWeb3 localStorage simulation maintained for all features with seamless upgrade path to real blockchain contracts in Milestone 2.
+- **Contract Service Layer**: Abstraction in `client/src/config/contracts.ts` with getNetworkConfig() function enabling dynamic mode selection without breaking existing features.
+- **Migration Strategy**: Clear path from localStorage simulation → Celo Alfajores testnet → Celo mainnet with backward compatibility for all Sprint 1-3 features.
 
 ### State Management
-- **React Query**: Server state caching and synchronization
-- **Custom Hooks**: Encapsulated wallet connection and mobile detection logic
-- **Context Pattern**: Shared state for UI components like toasts and modals
-
-### Blockchain Integration
-- **Wallet Connection**: MetaMask integration with fallback simulation
-- **Astar Network**: Target blockchain for token transactions
-- **Token Economy**: Community fund donations and challenge rewards system
+- **Client-side**: React Query for server state caching, custom hooks for wallet and mobile detection, React Context for shared UI state (toasts, modals).
 
 ## External Dependencies
 
 ### Database Services
-- **Neon Database**: Serverless PostgreSQL database provider
-- **Environment Variables**: Database connection via DATABASE_URL
+- **Neon Database**: Serverless PostgreSQL database.
 
 ### Blockchain Infrastructure
-- **MetaMask**: Web3 wallet for user authentication and transactions
-- **Astar Network**: Layer 1 blockchain for token operations
-- **Ethers.js**: Ethereum JavaScript library for blockchain interactions
+- **MetaMask**: Web3 wallet for user authentication and blockchain transactions.
+- **Celo Network**: Primary target Layer 1 blockchain - Celo Alfajores testnet (Chain ID 44787) prepared for Milestone 2 smart contract deployment.
+- **Astar Network**: Secondary target Layer 1 blockchain - Astar Shibuya testnet (Chain ID 81) maintained for future deployment options.
+- **Ethers.js**: Ethereum JavaScript library for blockchain interactions.
+- **Demo Wallet**: Mock wallet address (0xDEMO1234567890abcdef1234567890abcdef1234) with localStorage simulation for testing without MetaMask.
 
 ### UI and Styling
-- **Radix UI**: Accessible component primitives for complex UI elements
-- **Lucide React**: Feather-inspired icon library
-- **Google Fonts**: Custom typography with Inter and additional font families
-- **Tailwind CSS**: Utility-first CSS framework
-
-### Development Tools
-- **Replit Integration**: Development environment optimizations and debugging tools
-- **ESBuild**: Fast JavaScript bundler for production builds
-- **PostCSS**: CSS processing with Tailwind and Autoprefixer plugins
+- **Radix UI**: Accessible component primitives.
+- **Lucide React**: Icon library.
+- **Google Fonts**: Custom typography.
+- **Tailwind CSS**: Utility-first CSS framework.
 
 ### Content and Media
-- **Unsplash**: External image hosting for charity and community content
-- **Font Awesome**: Icon library for social media and branding elements
+- **Unsplash**: External image hosting.
+- **Font Awesome**: Icon library.
 
-### Runtime Environment
-- **Node.js**: Server runtime with ES module support
-- **TypeScript**: Type checking and compilation
-- **Vite**: Development server with hot module replacement
+### Development Tools
+- **Replit Integration**: Development environment optimizations.
+- **ESBuild**: Fast JavaScript bundler.
+- **PostCSS**: CSS processing.
+- **Node.js**: Server runtime.
+- **TypeScript**: Type checking.
+- **Vite**: Development server.
