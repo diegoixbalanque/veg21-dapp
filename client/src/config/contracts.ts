@@ -6,6 +6,27 @@ import { ContractConfig, ServiceConfig, ServiceMode } from '@/types/contracts';
 // Re-export for convenience
 export { ServiceMode };
 
+// Celo Alfajores Testnet Configuration (Sprint 4: Milestone 2 preparation)
+export const CELO_ALFAJORES_CONFIG: ContractConfig = {
+  addresses: {
+    staking: '0x0000000000000000000000000000000000000000', // Placeholder - to be deployed in Milestone 2
+    donations: '0x0000000000000000000000000000000000000000', // Placeholder - to be deployed in Milestone 2
+    rewards: '0x0000000000000000000000000000000000000000', // Placeholder - to be deployed in Milestone 2
+    token: '0x0000000000000000000000000000000000000000', // Placeholder - to be deployed in Milestone 2
+  },
+  network: {
+    chainId: 44787, // Celo Alfajores Testnet
+    name: 'Celo Alfajores',
+    rpcUrl: 'https://alfajores-forno.celo-testnet.org',
+    blockExplorer: 'https://alfajores.celoscan.io'
+  },
+  deployment: {
+    blockNumber: 0, // To be updated after deployment
+    deployer: '0x0000000000000000000000000000000000000000', // To be updated after deployment
+    timestamp: 0 // To be updated after deployment
+  }
+};
+
 // Astar Network Configuration (Testnet)
 export const ASTAR_TESTNET_CONFIG: ContractConfig = {
   addresses: {
@@ -74,7 +95,11 @@ const CONTRACT_CONFIGS: Record<string, ContractConfig> = {
   development: LOCAL_DEV_CONFIG,
   testnet: ASTAR_TESTNET_CONFIG,
   mainnet: ASTAR_MAINNET_CONFIG,
-  local: LOCAL_DEV_CONFIG
+  local: LOCAL_DEV_CONFIG,
+  'celo-testnet': CELO_ALFAJORES_CONFIG,
+  'celo-alfajores': CELO_ALFAJORES_CONFIG,
+  'astar-testnet': ASTAR_TESTNET_CONFIG,
+  'astar-shibuya': ASTAR_TESTNET_CONFIG
 };
 
 // Get environment variables with defaults
@@ -89,19 +114,63 @@ const getEnvVar = (key: string, defaultValue: string): string => {
 
 // Service configuration factory
 export function createServiceConfig(): ServiceConfig {
+  // VEG21_MODE is the primary mode selector (Sprint 4)
+  // Possible values: 'demo', 'celo-testnet', 'astar-testnet', 'mainnet'
+  const veg21Mode = getEnvVar('VEG21_MODE', 'demo');
+  
+  // Legacy support for existing environment variables
   const mockMode = getEnvVar('MOCK_MODE', 'true') === 'true';
   const environment = getEnvVar('ENVIRONMENT', 'development');
-  
-  // For Sprint 9: Enable hybrid mode where only staking uses real contracts
   const hybridMode = getEnvVar('HYBRID_MODE', 'true') === 'true';
   
   let mode: ServiceMode;
-  if (mockMode && !hybridMode) {
-    mode = ServiceMode.MOCK;
-  } else if (!mockMode && !hybridMode) {
-    mode = ServiceMode.CONTRACT;
-  } else {
-    mode = ServiceMode.HYBRID;
+  let contractConfig: ContractConfig;
+  
+  // VEG21_MODE takes precedence over legacy variables
+  switch (veg21Mode.toLowerCase()) {
+    case 'demo':
+    case 'mock':
+      // Demo mode: pure simulation, no blockchain interaction
+      mode = ServiceMode.MOCK;
+      contractConfig = CELO_ALFAJORES_CONFIG; // Target network for future migration
+      break;
+      
+    case 'celo-testnet':
+    case 'celo-alfajores':
+      // Celo testnet mode: real blockchain (Milestone 2)
+      mode = ServiceMode.CONTRACT;
+      contractConfig = CELO_ALFAJORES_CONFIG;
+      break;
+      
+    case 'astar-testnet':
+    case 'astar-shibuya':
+      // Astar testnet mode: real blockchain (existing)
+      mode = ServiceMode.CONTRACT;
+      contractConfig = ASTAR_TESTNET_CONFIG;
+      break;
+      
+    case 'hybrid':
+      // Hybrid mode: mix of mock and real (Sprint 9 staking)
+      mode = ServiceMode.HYBRID;
+      contractConfig = ASTAR_TESTNET_CONFIG;
+      break;
+      
+    case 'mainnet':
+      // Mainnet mode: production blockchain
+      mode = ServiceMode.CONTRACT;
+      contractConfig = ASTAR_MAINNET_CONFIG;
+      break;
+      
+    default:
+      // Fallback to legacy mode selection
+      if (mockMode && !hybridMode) {
+        mode = ServiceMode.MOCK;
+      } else if (!mockMode && !hybridMode) {
+        mode = ServiceMode.CONTRACT;
+      } else {
+        mode = ServiceMode.HYBRID;
+      }
+      contractConfig = CONTRACT_CONFIGS[environment] || LOCAL_DEV_CONFIG;
   }
   
   return {
@@ -115,7 +184,7 @@ export function createServiceConfig(): ServiceConfig {
         astr: 0.5
       }
     },
-    contractConfig: CONTRACT_CONFIGS[environment] || LOCAL_DEV_CONFIG,
+    contractConfig,
     hybridConfig: {
       // Sprint 9: Only staking module uses real contracts
       useRealStaking: true,
