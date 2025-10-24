@@ -127,15 +127,32 @@ export function CommunityActivityFeed({
             };
             break;
 
-          case 'receive':
-            if (tx.from) {
+          case 'send':
+          case 'transfer':
+            if (tx.to) {
+              const recipientShort = tx.to.slice(0, 6) + '...' + tx.to.slice(-4);
               activity = {
                 id: tx.id,
                 type: 'reward_claim',
                 userId: tx.txHash.slice(-8),
                 userName,
                 amount: tx.amount,
-                description: `recibió ${tx.amount} VEG21 tokens`,
+                description: `envió ${tx.amount} VEG21 tokens a ${recipientShort}`,
+                timestamp: new Date(tx.timestamp)
+              };
+            }
+            break;
+
+          case 'receive':
+            if (tx.from) {
+              const senderShort = tx.from.slice(0, 6) + '...' + tx.from.slice(-4);
+              activity = {
+                id: tx.id,
+                type: 'reward_claim',
+                userId: tx.txHash.slice(-8),
+                userName,
+                amount: tx.amount,
+                description: `recibió ${tx.amount} VEG21 tokens de ${senderShort}`,
                 timestamp: new Date(tx.timestamp)
               };
             }
