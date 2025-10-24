@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { communityService, CommunityPost } from "@/lib/community-service";
 import { RecipeForm } from "@/components/recipe-form";
 import { PostInteractions } from "@/components/post-interactions";
+import { CommunityActivityFeed } from "@/components/community-activity-feed";
 import { 
   Plus, 
   Clock, 
@@ -187,6 +188,13 @@ export default function Community() {
                 ))}
               </CardContent>
             </Card>
+
+            {/* Community Activity Feed */}
+            <CommunityActivityFeed 
+              maxHeight="400px" 
+              showTitle={true}
+              currentUserId={formattedAddress || undefined}
+            />
           </div>
 
           {/* Main Feed */}

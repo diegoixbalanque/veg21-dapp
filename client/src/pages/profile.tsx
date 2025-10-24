@@ -17,6 +17,8 @@ import {
   approveCheckIn,
   type DailyCheckIn 
 } from "@/components/daily-check-in";
+import { TransactionHistory } from "@/components/transaction-history";
+import { SendVEG21Modal } from "@/components/send-veg21-modal";
 import { 
   User, 
   Edit3, 
@@ -34,7 +36,9 @@ import {
   Wallet,
   Plus,
   Minus,
-  Camera
+  Camera,
+  ArrowUpRight,
+  History
 } from "lucide-react";
 import { formatTokenAmount, mockWeb3Service } from "@/lib/mockWeb3";
 
@@ -67,6 +71,8 @@ export default function Profile() {
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [userCheckIns, setUserCheckIns] = useState<DailyCheckIn[]>([]);
   const [refreshCheckIns, setRefreshCheckIns] = useState(0);
+  const [showSendModal, setShowSendModal] = useState(false);
+  const [showTransactionHistory, setShowTransactionHistory] = useState(false);
 
   // Load user data on component mount
   useEffect(() => {
@@ -670,6 +676,27 @@ export default function Profile() {
             </Card>
           )}
 
+          {/* Transaction History Section */}
+          {isConnected && mockWeb3.isInitialized && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+                  <History className="w-6 h-6 text-veg-primary" />
+                  <span>Historial de Transacciones</span>
+                </h3>
+                <Button
+                  onClick={() => setShowSendModal(true)}
+                  className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary"
+                  data-testid="button-send-veg21"
+                >
+                  <ArrowUpRight className="w-4 h-4 mr-2" />
+                  Enviar VEG21
+                </Button>
+              </div>
+              <TransactionHistory maxHeight="400px" showTitle={false} />
+            </div>
+          )}
+
           {/* Empty State for New Users */}
           {!currentChallenge && (
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm text-center py-12" data-testid="card-no-challenge">
@@ -694,6 +721,13 @@ export default function Profile() {
         onClose={() => setShowCheckInModal(false)}
         day={selectedDay}
         onCheckInComplete={handleCheckInComplete}
+      />
+
+      {/* Send VEG21 Modal */}
+      <SendVEG21Modal
+        isOpen={showSendModal}
+        onClose={() => setShowSendModal(false)}
+        currentBalance={mockWeb3.balance.veg21}
       />
     </div>
   );
