@@ -50,16 +50,20 @@ export interface MockWeb3State {
 
 export interface MockTransaction {
   id: string;
-  type: 'claim_reward' | 'contribute' | 'transfer' | 'stake_tokens' | 'unstake_tokens';
+  type: 'claim_reward' | 'contribute' | 'transfer' | 'receive' | 'stake_tokens' | 'unstake_tokens' | 'check_in' | 'validation';
   amount: number;
   status: 'pending' | 'confirmed' | 'failed';
   timestamp: Date;
   txHash: string;
+  from?: string;
+  to?: string;
   metadata?: {
     rewardId?: string;
     charityId?: string;
     stakeId?: string;
     description?: string;
+    checkInId?: string;
+    userName?: string;
   };
 }
 
@@ -406,6 +410,84 @@ class MockWeb3Service {
     });
   }
 
+  // Transfer tokens to another address
+  async transferTokens(toAddress: string, amount: number, description?: string): Promise<MockTransaction> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (amount <= 0) {
+          reject(new Error('El monto debe ser mayor a 0'));
+          return;
+        }
+
+        if (this.state.balance.veg21 < amount) {
+          reject(new Error('Saldo insuficiente'));
+          return;
+        }
+
+        if (!toAddress || toAddress.length < 10) {
+          reject(new Error('Dirección de destino inválida'));
+          return;
+        }
+
+        // Deduct from balance
+        this.state.balance.veg21 -= amount;
+
+        // Create transaction record
+        const transaction: MockTransaction = {
+          id: `transfer_${Date.now()}`,
+          type: 'transfer',
+          amount,
+          status: 'confirmed',
+          timestamp: new Date(),
+          txHash: this.generateTxHash(),
+          to: toAddress,
+          metadata: {
+            description: description || `Transferencia a ${toAddress.slice(0, 8)}...${toAddress.slice(-6)}`
+          }
+        };
+
+        this.transactions.push(transaction);
+        this.saveStateToStorage();
+        this.saveTransactionsToStorage();
+
+        this.emit('balance_updated', this.state.balance);
+        this.emit('state_changed', this.state);
+
+        resolve(transaction);
+      }, 2000);
+    });
+  }
+
+  // Record receiving tokens (for display purposes)
+  recordReceive(fromAddress: string, amount: number, description?: string): MockTransaction {
+    // Add to balance
+    this.state.balance.veg21 += amount;
+    this.state.totalEarned += amount;
+
+    // Create transaction record
+    const transaction: MockTransaction = {
+      id: `receive_${Date.now()}`,
+      type: 'receive',
+      amount,
+      status: 'confirmed',
+      timestamp: new Date(),
+      txHash: this.generateTxHash(),
+      from: fromAddress,
+      metadata: {
+        description: description || `Recibido de ${fromAddress.slice(0, 8)}...${fromAddress.slice(-6)}`
+      }
+    };
+
+    this.transactions.push(transaction);
+    this.saveStateToStorage();
+    this.saveTransactionsToStorage();
+
+    this.emit('balance_updated', this.state.balance);
+    this.emit('state_changed', this.state);
+
+    return transaction;
+  }
+
   // Get user's contribution history
   getContributions(): ContributionRecord[] {
     return [...this.state.contributions];
@@ -418,6 +500,11 @@ class MockWeb3Service {
 
   // Get transaction history
   getTransactions(): MockTransaction[] {
+    return [...this.transactions];
+  }
+
+  // Get all transactions (alias for veg21_tx_history compatibility)
+  getAllTransactions(): MockTransaction[] {
     return [...this.transactions];
   }
 
