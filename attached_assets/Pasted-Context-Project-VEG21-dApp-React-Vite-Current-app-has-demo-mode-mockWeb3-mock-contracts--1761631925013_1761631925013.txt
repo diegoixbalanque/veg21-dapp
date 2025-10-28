@@ -1,0 +1,61 @@
+Context:
+- Project: VEG21 dApp (React + Vite). Current app has demo mode, mockWeb3, mock contracts, and hardhat scripts scaffolded.
+- Important: The user is NOT providing any private key or real wallet now and does NOT want any on-chain transactions executed. All work must continue in mock/demo mode or with placeholder addresses. Prepare everything so a final deployment can be done later when the user provides credentials.
+
+Goal:
+Continue Sprint work to finish frontend <-> contract integration, developer docs, and "ready-to-deploy" scripts, but avoid requesting or using any private key or performing any real network transactions. Default runtime mode must be `VEG21_MODE=mock`. Where contract addresses are needed, use placeholder env variables and mock addresses.
+
+Tasks (deliverables):
+
+1) ContractService layer (no on-chain writes):
+  - Implement `services/ContractService.ts` that wraps ethers.js methods with clear switch:
+      - If `VEG21_MODE === 'mock'` -> route calls to existing mockWeb3 service.
+      - Else -> route to ethers.js provider & contract instance using addresses from env (but do NOT initialize provider if PRIVATE_KEY or RPC not present; instead log "deploy-ready: missing credentials").
+  - Expose methods: `getBalance(address)`, `claimReward(rewardId)`, `donate(charityId, amount)`, `stake(amount)`, `unstake(stakeId)`, `transfer(recipient, amount)`, `getActivity(account)`.
+
+2) Event listeners & activity sync (development-safe):
+  - Implement event-listening stubs that in mock mode read localStorage and simulate block events.
+  - Provide real-mode listeners code (provider.on(...)) but guard initialization: do not call provider if no RPC or no PRIVATE_KEY env present.
+
+3) Frontend integration:
+  - Replace direct calls to mockWeb3 in high-level components with the new ContractService wrapper.
+  - Ensure all wallet-gated UI works with demo wallet and with real wallet (if connected) — but never auto-trigger any wallet connection prompts.
+  - Add a conspicuous UI indicator when in `mock/demo` mode (e.g., purple banner “Demo Mode — No on-chain transactions”).
+
+4) Deploy readiness & scripts (no actual deploy):
+  - Finalize /scripts/deploy.ts but make it **dry-run by default**. Add flag `--execute` to perform real deploy; default runs a full simulated deploy that writes deployment JSON locally but does NOT broadcast transactions.
+  - Add a helper script `scripts/ready_for_deploy.sh` that validates environment (checks RPC URL, CeloScan API key, PRIVATE_KEY presence) and prints a one-line checklist and command to actually deploy (so user can copy/paste when ready).
+
+5) Documentation & checklist:
+  - Create `DEPLOYMENT_CHECKLIST.md` with:
+      - Step-by-step real-deploy instructions (including creating a dedicated deployment wallet).
+      - Security reminders (never commit .env).
+      - Exact hardhat commands for Sepolia/Alfajores/Mainnet (include gas estimate notes).
+  - Update `.env.example` with all variables and instructions.
+  - Create `REVIEW_AND_VERIFY.md` with a QA checklist for the user to follow before switching to mainnet.
+
+6) Tests & CI (mock-only):
+  - Add end-to-end Playwright test that runs fully in demo mode (no MetaMask or private keys), checking: join challenge, claim rewards, donate mock tokens, stake/unstake flows, activity feed shows transactions.
+  - Add a GitHub Action (mock-only) that runs `npm test` and the Playwright demo test on pushes to main branch. The action must **never** run deployment scripts.
+
+7) Deliver a short developer report (README update):
+  - One-page summary of what's implemented, where to insert PRIVATE_KEY when ready, and a clear command sequence for final deploy flagged with `--execute`.
+
+Constraints:
+- Do NOT prompt the user for private keys, wallet seed phrases, or to authorize any extension.
+- Do NOT attempt to send any transactions or call any real-provider RPCs unless the user explicitly sets `VEG21_MODE` to `celo-testnet` or `celo-mainnet` and **adds** valid RPC and PRIVATE_KEY to env. If those vars are present, only run the deploy when user runs the deploy command with `--execute`.
+- Use placeholder contract addresses in code (e.g., `0x000000000000000000000000000000000000DEMO`) and ensure they are read from env variables.
+
+Acceptance criteria (when you mark this task done):
+- ContractService implemented and used by UI (mock fallback working).
+- Dry-run deploy script and deploy checklist present.
+- Playwright demo tests pass locally and in CI.
+- `.env.example`, `DEPLOYMENT_CHECKLIST.md`, and `REVIEW_AND_VERIFY.md` added and clear.
+- No prompts for private keys or wallet access were requested during the run.
+
+Please reply with:
+- A summary of files changed/created and where the main integration points are.
+- Any manual steps I must perform to actually run the dry-run deploy, and the single command to run the real deploy when I'm ready.
+- Time estimate and approximate credit usage for performing the above tasks.
+
+You may proceed.

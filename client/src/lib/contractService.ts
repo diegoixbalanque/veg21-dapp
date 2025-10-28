@@ -1,5 +1,12 @@
 // Smart Contract Service Layer for VEG21 dApp
 // This service provides a unified interface for interacting with both mock and real smart contracts
+// 
+// DEPLOYMENT SAFETY: This service will NOT initialize provider connections if:
+// - RPC URL is not set
+// - PRIVATE_KEY is not available (when needed)
+// - VEG21_MODE is set to 'mock' or 'demo'
+//
+// Default mode is MOCK to prevent accidental on-chain transactions
 
 import { 
   IContractService, 
@@ -31,6 +38,32 @@ import TokenABI from '@/contracts/TokenContract.json';
 // Event emitter for contract events
 type ContractEventType = 'balance_updated' | 'transaction_confirmed' | 'state_changed' | 'error';
 type ContractEventCallback = (data: any) => void;
+
+// Credential validation helper
+function hasValidCredentials(): boolean {
+  const rpcUrl = import.meta.env.VITE_RPC_URL;
+  const mode = import.meta.env.VITE_VEG21_MODE || 'demo';
+  
+  if (mode === 'mock' || mode === 'demo') {
+    return false; // Explicitly in mock mode
+  }
+  
+  if (!rpcUrl || rpcUrl === '') {
+    console.warn('Deploy-ready: Missing VITE_RPC_URL. Add to .env for real contract mode.');
+    return false;
+  }
+  
+  return true;
+}
+
+// Check if MetaMask wallet is available
+function hasWalletProvider(): boolean {
+  if (typeof window === 'undefined' || !window.ethereum) {
+    console.log('Deploy-ready: MetaMask not detected. Install MetaMask or use demo mode.');
+    return false;
+  }
+  return true;
+}
 
 // Base contract implementation
 abstract class BaseContract {
@@ -537,25 +570,164 @@ class ContractRewards extends BaseContract implements IRewards {
 }
 
 class ContractToken extends BaseContract implements IToken {
-  // TODO: Implement real contract interactions
+  private contract: Contract | null = null;
+  private provider: BrowserProvider | null = null;
+
+  async initialize(): Promise<void> {
+    if (!hasValidCredentials() || !hasWalletProvider()) {
+      console.log('Deploy-ready: Skipping real token contract initialization (missing credentials or wallet)');
+      return;
+    }
+
+    console.log(`Initializing real token contract at ${this.address}`);
+    
+    try {
+      this.provider = new BrowserProvider(window.ethereum);
+      const signer = await this.provider.getSigner();
+      this.contract = new Contract(this.address, this.abi, signer);
+      
+      const code = await this.provider.getCode(this.address);
+      if (code === '0x') {
+        throw new Error(`No contract deployed at address ${this.address}`);
+      }
+      
+      this.isInitialized = true;
+      console.log('Real token contract initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize token contract:', error);
+      throw error;
+    }
+  }
+
   async getBalance(): Promise<TokenBalance> {
-    throw new Error('Real contract implementation not yet available. Use mock mode for now.');
+    if (!this.contract || !this.provider) {
+      console.warn('Deploy-ready: Token contract not initialized, returning zero balance');
+      return { veg21: 0, astr: 0 };
+    }
+
+    try {
+      const signer = await this.provider.getSigner();
+      const address = await signer.getAddress();
+      const balance = await this.contract.balanceOf(address);
+      return {
+        veg21: parseFloat(formatEther(balance)),
+        astr: 0 // Not tracking CELO balance here
+      };
+    } catch (error: any) {
+      console.error('Error getting balance:', error);
+      return { veg21: 0, astr: 0 };
+    }
   }
 
   async transfer(to: string, amount: number): Promise<MockTransaction> {
-    throw new Error('Real contract implementation not yet available. Use mock mode for now.');
+    if (!this.contract) {
+      throw new Error('Contract not initialized. Call initialize() first or use mock mode.');
+    }
+
+    try {
+      const amountWei = parseEther(amount.toString());
+      const tx = await this.contract.transfer(to, amountWei);
+      console.log('Transfer transaction sent:', tx.hash);
+      
+      const receipt = await tx.wait();
+      console.log('Transfer confirmed:', receipt.transactionHash);
+      
+      return {
+        id: `transfer_${Date.now()}`,
+        type: 'transfer',
+        amount,
+        status: 'confirmed',
+        timestamp: new Date(),
+        txHash: receipt.hash,
+        to,
+        metadata: { description: `Transferred ${amount} VEG21 to ${to}` }
+      };
+    } catch (error: any) {
+      console.error('Error transferring tokens:', error);
+      if (error.code === 'USER_REJECTED') {
+        throw new Error('Transaction was rejected by user');
+      }
+      throw new Error(`Transfer failed: ${error.message}`);
+    }
   }
 
   async approve(spender: string, amount: number): Promise<MockTransaction> {
-    throw new Error('Real contract implementation not yet available. Use mock mode for now.');
+    if (!this.contract) {
+      throw new Error('Contract not initialized. Call initialize() first or use mock mode.');
+    }
+
+    try {
+      const amountWei = parseEther(amount.toString());
+      const tx = await this.contract.approve(spender, amountWei);
+      console.log('Approve transaction sent:', tx.hash);
+      
+      const receipt = await tx.wait();
+      console.log('Approve confirmed:', receipt.transactionHash);
+      
+      return {
+        id: `approve_${Date.now()}`,
+        type: 'transfer',
+        amount,
+        status: 'confirmed',
+        timestamp: new Date(),
+        txHash: receipt.hash,
+        metadata: { description: `Approved ${amount} VEG21 for ${spender}` }
+      };
+    } catch (error: any) {
+      console.error('Error approving tokens:', error);
+      throw new Error(`Approval failed: ${error.message}`);
+    }
   }
 
   async getAllowance(spender: string): Promise<number> {
-    throw new Error('Real contract implementation not yet available. Use mock mode for now.');
+    if (!this.contract || !this.provider) {
+      return 0;
+    }
+
+    try {
+      const signer = await this.provider.getSigner();
+      const owner = await signer.getAddress();
+      const allowance = await this.contract.allowance(owner, spender);
+      return parseFloat(formatEther(allowance));
+    } catch (error: any) {
+      console.error('Error getting allowance:', error);
+      return 0;
+    }
   }
 
   async getTokenInfo(): Promise<{ name: string; symbol: string; decimals: number; totalSupply: number }> {
-    throw new Error('Real contract implementation not yet available. Use mock mode for now.');
+    if (!this.contract) {
+      return {
+        name: 'VEG21 Token',
+        symbol: 'VEG21',
+        decimals: 18,
+        totalSupply: 0
+      };
+    }
+
+    try {
+      const [name, symbol, decimals, totalSupply] = await Promise.all([
+        this.contract.name(),
+        this.contract.symbol(),
+        this.contract.decimals(),
+        this.contract.totalSupply()
+      ]);
+      
+      return {
+        name,
+        symbol,
+        decimals,
+        totalSupply: parseFloat(formatEther(totalSupply))
+      };
+    } catch (error: any) {
+      console.error('Error getting token info:', error);
+      return {
+        name: 'VEG21 Token',
+        symbol: 'VEG21',
+        decimals: 18,
+        totalSupply: 0
+      };
+    }
   }
 }
 

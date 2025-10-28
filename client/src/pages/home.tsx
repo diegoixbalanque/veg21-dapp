@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/header";
+import { DemoModeBanner, NetworkModeBanner } from "@/components/demo-mode-banner";
 import { HeroSection } from "@/components/hero-section";
 import { ActiveChallenges } from "@/components/active-challenges";
 import { UserActivity } from "@/components/user-activity";
@@ -35,6 +36,13 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Header />
+      
+      {/* Mode Banners */}
+      <div className="container mx-auto px-4 pt-4">
+        <DemoModeBanner />
+        <NetworkModeBanner />
+      </div>
+      
       <HeroSection />
       <ActiveChallenges />
       <UserActivity />
