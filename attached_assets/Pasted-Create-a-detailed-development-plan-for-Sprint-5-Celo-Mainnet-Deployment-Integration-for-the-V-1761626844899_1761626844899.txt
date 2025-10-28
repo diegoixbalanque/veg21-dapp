@@ -1,0 +1,86 @@
+Create a detailed development plan for **Sprint 5: Celo Mainnet Deployment & Integration** for the VEG21 dApp.
+
+🎯 **Goal:**
+Transition the existing React + Vite dApp (VEG21) from mockWeb3 demo mode to a real Celo network deployment, with verified smart contracts and functional wallet interactions.
+
+---
+
+### 🔹 Context:
+- The project is a vegan challenge platform with tokenized actions and rewards (VEG21 token).
+- It currently runs fully in **Demo Mode** using a mockWeb3 service for tokens and transactions.
+- Architecture already supports `VEG21_MODE` switching between demo, local, and testnet modes.
+- The next step is to connect the app to **Celo Mainnet** (or Celo Sepolia Testnet, if needed), deploy real contracts, and verify interaction through MetaMask or Celo Wallet.
+- Repository: https://github.com/diegoixbalanque/veg21-dapp
+
+---
+
+### 🧩 **Key Deliverables for this Sprint:**
+1. **Smart Contract Deployment**
+   - Prepare a production-ready version of `VEG21Token.sol` (ERC20).
+   - Configure Hardhat or Foundry to deploy to Celo Mainnet and Celo Sepolia.
+   - Generate deployment scripts with proper `network`, `gasPrice`, and `chainId` setup.
+   - Verify deployed contracts on CeloScan.
+
+2. **Environment Configuration**
+   - Add `.env` variables for CELO RPC endpoints (Mainnet + Sepolia).
+   - Configure `chainConfig.ts` with mainnet values:
+     - Chain ID: 42220
+     - RPC URL: `https://forno.celo.org`
+     - Block Explorer: `https://celoscan.io`
+   - Add fallback for Sepolia: `https://sepolia-forno.celo-testnet.org`
+
+3. **Wallet Connection**
+   - Integrate MetaMask / Celo Extension Wallet connection via `ethers` or `@celo/contractkit`.
+   - Detect network mismatch and prompt users to switch to Celo.
+
+4. **Contract Interaction Layer**
+   - Replace mockWeb3 calls with real `ethers` or `contractkit` functions for:
+     - Reading balances
+     - Sending tokens
+     - Viewing transaction history
+   - Maintain fallback to mockWeb3 for offline demo mode.
+
+5. **Transaction Feed Synchronization**
+   - Connect community activity feed to actual blockchain transaction data (token transfers, rewards, donations).
+   - Implement event listeners for `Transfer` and `Approval` events.
+
+6. **Verification and Payout Setup**
+   - Configure and test the payout wallet (EVM-compatible address).
+   - Link deployed contract address, payout address, and repository in the Proof of Ship dashboard.
+   - Ensure the project meets all Celo Colombia admin requirements:
+     - Linked contracts ✅
+     - Linked GitHub ✅
+     - Linked DIVVI identifier (to be integrated)
+     - Payout address configured ✅
+
+7. **Documentation**
+   - Update `README.md` and `replit.md` to describe:
+     - Network configuration
+     - Deployment process
+     - Verification instructions
+     - Links to CeloScan contract pages
+
+---
+
+### 🧪 **Expected Output:**
+A structured Sprint 5 plan with:
+- 6–9 detailed tasks (with dependencies)
+- Clear time and cost estimates
+- Logical progression from deployment → integration → verification → documentation
+- Ready-to-execute steps for the next “Iterate” sprint in Replit
+
+---
+
+### ⚙️ **Technical Notes:**
+- Frontend: React + Vite + TypeScript
+- Blockchain: Solidity + Hardhat (preferred)
+- Network: Celo Mainnet (Chain ID 42220)
+- Fallback: Celo Sepolia (Chain ID 44787)
+- Wallets: MetaMask + Celo Extension Wallet
+- Token: ERC20 (VEG21)
+- Environment variable: `VEG21_MODE`
+- RPC provider: `https://forno.celo.org`
+
+---
+
+Generate the complete sprint plan now.
