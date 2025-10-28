@@ -1,3 +1,5 @@
+import { getDefaultNetwork, switchToNetwork, type ChainConfig } from '@/config/chainConfig';
+
 declare global {
   interface Window {
     ethereum?: any;
@@ -21,6 +23,7 @@ export class EthersService {
       
       // If already connected, return the existing account
       if (accounts.length > 0) {
+        console.log('Wallet already connected:', accounts[0]);
         return accounts[0];
       }
 
@@ -33,6 +36,7 @@ export class EthersService {
         throw new Error('No accounts found');
       }
 
+      console.log('Wallet connected successfully:', requestedAccounts[0]);
       return requestedAccounts[0];
     } catch (error: any) {
       // Handle specific MetaMask error codes
@@ -59,6 +63,55 @@ export class EthersService {
     return '450';
   }
 
+  /**
+   * Switch to the configured VEG21 network based on VEG21_MODE
+   * Supports Celo (Alfajores, Mainnet) and legacy Astar networks
+   */
+  async switchToConfiguredNetwork(): Promise<void> {
+    if (!window.ethereum) {
+      throw new Error('MetaMask is not installed!');
+    }
+
+    const network = getDefaultNetwork();
+    console.log('Switching to configured network:', network.displayName, `(${network.chainId})`);
+
+    try {
+      // Check current network
+      const currentChainId = await window.ethereum.request({
+        method: 'eth_chainId'
+      });
+      
+      const currentChainIdDec = parseInt(currentChainId, 16);
+      
+      // Already on correct network
+      if (currentChainIdDec === network.chainId) {
+        console.log('Already on correct network');
+        return;
+      }
+
+      // Use the switchToNetwork helper from chainConfig
+      const success = await switchToNetwork(network);
+      
+      if (!success) {
+        throw new Error(`Failed to switch to ${network.displayName}`);
+      }
+      
+      console.log(`Successfully switched to ${network.displayName}`);
+    } catch (error: any) {
+      console.error('Network switch error:', error);
+      
+      // Re-throw with more context
+      if (error.code === 4001) {
+        throw new Error('User rejected network switch request');
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Legacy method for Astar network switching (backward compatibility)
+   */
   async switchToAstarNetwork(): Promise<void> {
     if (!window.ethereum) {
       throw new Error('MetaMask is not installed!');
@@ -154,8 +207,56 @@ export class EthersService {
     }
   }
   
+  async getCurrentChainId(): Promise<number | null> {
+    if (!window.ethereum) {
+      return null;
+    }
+    
+    try {
+      const chainId = await window.ethereum.request({
+        method: 'eth_chainId'
+      });
+      return parseInt(chainId, 16);
+    } catch (error) {
+      console.error('Failed to get current chain ID:', error);
+      return null;
+    }
+  }
+  
   isAstarNetwork(chainId: string): boolean {
     return chainId === '0x250' || chainId === '0x51'; // Mainnet or Shibuya testnet
+  }
+  
+  isCeloNetwork(chainId: string): boolean {
+    return chainId === '0xa4ec' || chainId === '0xaef3'; // Celo Mainnet (42220) or Alfajores (44787)
+  }
+  
+  /**
+   * Listen for account changes (wallet disconnect or account switch)
+   */
+  onAccountsChanged(callback: (accounts: string[]) => void): void {
+    if (!window.ethereum) return;
+    
+    window.ethereum.on('accountsChanged', callback);
+  }
+  
+  /**
+   * Listen for network/chain changes
+   */
+  onChainChanged(callback: (chainId: string) => void): void {
+    if (!window.ethereum) return;
+    
+    window.ethereum.on('chainChanged', callback);
+  }
+  
+  /**
+   * Remove event listeners
+   */
+  removeAllListeners(): void {
+    if (!window.ethereum) return;
+    
+    window.ethereum.removeAllListeners('accountsChanged');
+    window.ethereum.removeAllListeners('chainChanged');
   }
 
   formatAddress(address: string): string {

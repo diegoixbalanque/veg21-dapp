@@ -6,13 +6,21 @@ import { ContractConfig, ServiceConfig, ServiceMode } from '@/types/contracts';
 // Re-export for convenience
 export { ServiceMode };
 
-// Celo Alfajores Testnet Configuration (Sprint 4: Milestone 2 preparation)
+// Helper function to get contract addresses from environment
+const getEnvAddress = (key: string, fallback: string = '0x0000000000000000000000000000000000000000'): string => {
+  if (typeof window !== 'undefined') {
+    return (import.meta.env as any)[`VITE_${key}`] || fallback;
+  }
+  return process.env[key] || fallback;
+};
+
+// Celo Alfajores Testnet Configuration (Sprint 5: Testnet deployment)
 export const CELO_ALFAJORES_CONFIG: ContractConfig = {
   addresses: {
-    staking: '0x0000000000000000000000000000000000000000', // Placeholder - to be deployed in Milestone 2
-    donations: '0x0000000000000000000000000000000000000000', // Placeholder - to be deployed in Milestone 2
-    rewards: '0x0000000000000000000000000000000000000000', // Placeholder - to be deployed in Milestone 2
-    token: '0x0000000000000000000000000000000000000000', // Placeholder - to be deployed in Milestone 2
+    token: getEnvAddress('CELO_ALFAJORES_TOKEN_ADDRESS'),
+    staking: getEnvAddress('CELO_ALFAJORES_STAKING_ADDRESS'),
+    donations: getEnvAddress('CELO_ALFAJORES_DONATIONS_ADDRESS'),
+    rewards: getEnvAddress('CELO_ALFAJORES_REWARDS_ADDRESS'),
   },
   network: {
     chainId: 44787, // Celo Alfajores Testnet
@@ -21,9 +29,30 @@ export const CELO_ALFAJORES_CONFIG: ContractConfig = {
     blockExplorer: 'https://alfajores.celoscan.io'
   },
   deployment: {
-    blockNumber: 0, // To be updated after deployment
-    deployer: '0x0000000000000000000000000000000000000000', // To be updated after deployment
-    timestamp: 0 // To be updated after deployment
+    blockNumber: 0, // Updated after deployment
+    deployer: '0x0000000000000000000000000000000000000000', // Updated after deployment
+    timestamp: 0 // Updated after deployment
+  }
+};
+
+// Celo Mainnet Configuration (Sprint 5: Production deployment)
+export const CELO_MAINNET_CONFIG: ContractConfig = {
+  addresses: {
+    token: getEnvAddress('CELO_MAINNET_TOKEN_ADDRESS'),
+    staking: getEnvAddress('CELO_MAINNET_STAKING_ADDRESS'),
+    donations: getEnvAddress('CELO_MAINNET_DONATIONS_ADDRESS'),
+    rewards: getEnvAddress('CELO_MAINNET_REWARDS_ADDRESS'),
+  },
+  network: {
+    chainId: 42220, // Celo Mainnet
+    name: 'Celo Mainnet',
+    rpcUrl: 'https://forno.celo.org',
+    blockExplorer: 'https://celoscan.io'
+  },
+  deployment: {
+    blockNumber: 0, // Updated after deployment
+    deployer: '0x0000000000000000000000000000000000000000', // Updated after deployment
+    timestamp: 0 // Updated after deployment
   }
 };
 
@@ -93,13 +122,16 @@ export const LOCAL_DEV_CONFIG: ContractConfig = {
 // Environment-based configuration mapping
 const CONTRACT_CONFIGS: Record<string, ContractConfig> = {
   development: LOCAL_DEV_CONFIG,
-  testnet: ASTAR_TESTNET_CONFIG,
-  mainnet: ASTAR_MAINNET_CONFIG,
+  testnet: CELO_ALFAJORES_CONFIG, // Default testnet is now Celo Alfajores
+  mainnet: CELO_MAINNET_CONFIG, // Default mainnet is now Celo
   local: LOCAL_DEV_CONFIG,
   'celo-testnet': CELO_ALFAJORES_CONFIG,
   'celo-alfajores': CELO_ALFAJORES_CONFIG,
+  'celo-mainnet': CELO_MAINNET_CONFIG,
+  'celo': CELO_MAINNET_CONFIG,
   'astar-testnet': ASTAR_TESTNET_CONFIG,
-  'astar-shibuya': ASTAR_TESTNET_CONFIG
+  'astar-shibuya': ASTAR_TESTNET_CONFIG,
+  'astar-mainnet': ASTAR_MAINNET_CONFIG
 };
 
 // Get environment variables with defaults
@@ -137,28 +169,41 @@ export function createServiceConfig(): ServiceConfig {
       
     case 'celo-testnet':
     case 'celo-alfajores':
-      // Celo testnet mode: real blockchain (Milestone 2)
+      // Celo testnet mode: real blockchain (Sprint 5)
       mode = ServiceMode.CONTRACT;
       contractConfig = CELO_ALFAJORES_CONFIG;
       break;
       
+    case 'celo-mainnet':
+    case 'celo':
+      // Celo mainnet mode: production blockchain (Sprint 5)
+      mode = ServiceMode.CONTRACT;
+      contractConfig = CELO_MAINNET_CONFIG;
+      break;
+      
     case 'astar-testnet':
     case 'astar-shibuya':
-      // Astar testnet mode: real blockchain (existing)
+      // Astar testnet mode: real blockchain (legacy)
       mode = ServiceMode.CONTRACT;
       contractConfig = ASTAR_TESTNET_CONFIG;
       break;
       
+    case 'astar-mainnet':
+      // Astar mainnet mode: production blockchain (legacy)
+      mode = ServiceMode.CONTRACT;
+      contractConfig = ASTAR_MAINNET_CONFIG;
+      break;
+      
     case 'hybrid':
-      // Hybrid mode: mix of mock and real (Sprint 9 staking)
+      // Hybrid mode: mix of mock and real (legacy)
       mode = ServiceMode.HYBRID;
       contractConfig = ASTAR_TESTNET_CONFIG;
       break;
       
     case 'mainnet':
-      // Mainnet mode: production blockchain
+      // Mainnet mode: defaults to Celo production blockchain
       mode = ServiceMode.CONTRACT;
-      contractConfig = ASTAR_MAINNET_CONFIG;
+      contractConfig = CELO_MAINNET_CONFIG;
       break;
       
     default:

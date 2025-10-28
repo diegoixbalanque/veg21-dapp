@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { ethersService } from '@/lib/ethers';
 import { useToast } from '@/hooks/use-toast';
 import { useMockWeb3 } from '@/hooks/use-mock-web3';
+import { getDefaultNetwork } from '@/config/chainConfig';
 
 export interface WalletError {
   code: string;
@@ -177,12 +178,13 @@ export function useWallet() {
       // Only switch network if we're not in mock mode
       if (serviceMode !== 'mock') {
         try {
-          await ethersService.switchToAstarNetwork();
+          const network = getDefaultNetwork();
+          await ethersService.switchToConfiguredNetwork();
           
           // Show success message for network switch
           toast({
-            title: "Red Astar Conectada",
-            description: "Cambiaste exitosamente a la red Astar.",
+            title: `Red ${network.displayName} Conectada`,
+            description: `Cambiaste exitosamente a la red ${network.displayName}.`,
             variant: "default",
           });
         } catch (networkError: any) {
@@ -190,20 +192,23 @@ export function useWallet() {
           const error = getErrorFromException(networkError);
           console.warn('Network switch failed:', error);
           
+          const network = getDefaultNetwork();
+          
           // Don't fail wallet connection if network switch fails
           if (error.type === 'switch_network_failed') {
             toast({
               title: "Advertencia de Red",
-              description: "Wallet conectada, pero no se pudo cambiar a la red Astar. Puedes cambiar manualmente.",
+              description: `Wallet conectada, pero no se pudo cambiar a la red ${network.displayName}. Puedes cambiar manualmente.`,
               variant: "default",
             });
           }
         }
       } else {
         // In mock mode, show mock network message
+        const network = getDefaultNetwork();
         toast({
           title: "Red Simulada Conectada",
-          description: "Conectado a la red simulada Astar (modo desarrollo).",
+          description: `Conectado a ${network.displayName} (modo demo).`,
           variant: "default",
         });
       }
@@ -219,12 +224,13 @@ export function useWallet() {
       
       // Save wallet state to localStorage
       try {
+        const network = getDefaultNetwork();
         localStorage.setItem('veg21_wallet', JSON.stringify({
           address,
           connected: true,
-          network: serviceMode === 'mock' ? 'astar-mock' : 'astar'
+          network: serviceMode === 'mock' ? network.name + '-mock' : network.name
         }));
-        console.log('Wallet state saved to localStorage:', address, `(${serviceMode} mode)`);
+        console.log('Wallet state saved to localStorage:', address, `(${serviceMode} mode on ${network.name})`);
       } catch (error) {
         console.warn('Failed to save wallet to localStorage:', error);
       }
@@ -308,12 +314,82 @@ export function useWallet() {
       console.warn('Failed to remove wallet from localStorage:', error);
     }
     
+    // Remove event listeners
+    ethersService.removeAllListeners();
+    
     toast({
       title: "Wallet Desconectada",
       description: "Tu wallet se ha desconectado exitosamente.",
       variant: "default",
     });
   }, [toast]);
+  
+  // Listen for account changes (wallet disconnect or account switch)
+  useEffect(() => {
+    if (!walletState.isConnected || isDemoMode()) {
+      return;
+    }
+    
+    const handleAccountsChanged = (accounts: string[]) => {
+      console.log('Accounts changed:', accounts);
+      
+      if (accounts.length === 0) {
+        // User disconnected wallet
+        console.log('User disconnected wallet');
+        disconnectWallet();
+      } else if (accounts[0] !== walletState.address) {
+        // User switched accounts
+        console.log('User switched accounts to:', accounts[0]);
+        setWalletState(prev => ({ ...prev, address: accounts[0] }));
+        
+        // Update localStorage
+        try {
+          const network = getDefaultNetwork();
+          localStorage.setItem('veg21_wallet', JSON.stringify({
+            address: accounts[0],
+            connected: true,
+            network: network.name
+          }));
+        } catch (error) {
+          console.warn('Failed to update wallet in localStorage:', error);
+        }
+        
+        // Re-initialize mock Web3 with new address
+        mockWeb3.initialize(accounts[0]).catch(error => {
+          console.warn('Failed to re-initialize mock Web3:', error);
+        });
+        
+        toast({
+          title: "Cuenta Cambiada",
+          description: `Cambiaste a una nueva cuenta: ${ethersService.formatAddress(accounts[0])}`,
+          variant: "default",
+        });
+      }
+    };
+    
+    const handleChainChanged = (chainId: string) => {
+      console.log('Chain changed to:', chainId);
+      const chainIdDec = parseInt(chainId, 16);
+      const network = getDefaultNetwork();
+      
+      if (chainIdDec !== network.chainId) {
+        toast({
+          title: "Red Cambiada",
+          description: `La red cambió. Por favor, cambia de vuelta a ${network.displayName} para usar VEG21.`,
+          variant: "destructive",
+        });
+      }
+    };
+    
+    // Add event listeners
+    ethersService.onAccountsChanged(handleAccountsChanged);
+    ethersService.onChainChanged(handleChainChanged);
+    
+    // Cleanup on unmount
+    return () => {
+      ethersService.removeAllListeners();
+    };
+  }, [walletState.isConnected, walletState.address, isDemoMode, disconnectWallet, toast, mockWeb3]);
   
   const retryConnection = useCallback(async () => {
     if (walletState.error?.type === 'installation_required') {
