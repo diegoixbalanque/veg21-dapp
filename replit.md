@@ -25,22 +25,29 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced Onboarding & Challenge Flow**: User registration, daily check-ins with photo/video proof upload (mock), community validation for check-ins, automatic 21-day challenge completion detection with +50 VEG21 bonus, leaderboard integration; localStorage persistence.
 - **Token Simulation & Transaction System**: Comprehensive transaction history (claims, transfers, donations, staking); peer-to-peer VEG21 token transfers with balance validation; community activity feed displaying real-time token events; localStorage persistence for transactions.
 
-### Blockchain and Web3 Integration (Sprint 4 - Milestone 2 Preparation)
-- **Celo Testnet Preparation**: Multi-network configuration system supporting Celo Alfajores (chainId 44787), Astar Shibuya (chainId 81), local Hardhat (chainId 31337), and Demo mode with environment-based switching via VEG21_MODE variable.
+### Blockchain and Web3 Integration (Mainnet Ready)
+- **Multi-Network Support**: Full configuration for Celo Alfajores testnet (chainId 44787), Celo Mainnet (chainId 42220), Astar Shibuya (chainId 81), local Hardhat (chainId 31337), and Demo mode with environment-based switching via VEG21_MODE variable.
 - **Network Configuration**: Centralized configuration in `client/src/config/chainConfig.ts` with NetworkConfig interface defining chainId, name, displayName, RPC URL, block explorer, native currency, and testnet flag for each supported network.
-- **Token Contract (Placeholder)**: ERC20 VEG21Token smart contract (`contracts/VEG21TokenMock.sol`) with:
-  - Standard ERC20 implementation (transfer, approve, transferFrom, balanceOf, totalSupply)
-  - Minting capabilities with authorized minter system for rewards contracts
-  - Burning mechanism for donations and charity contributions
-  - Owner-controlled minter management prepared for VEG21Staking and VEG21Rewards contracts
-  - Comprehensive deployment notes for Milestone 2 Celo Alfajores deployment
-  - Token economics: 18 decimals, configurable initial supply, integration points documented
-- **Wallet Integration**: MetaMask connection for real blockchain; demo wallet mode with localStorage simulation; enhanced wallet connection state management with purple UI indicators for demo mode.
-- **Dynamic Network Display**: Header component displays current network name from chainConfig based on VEG21_MODE (Celo Alfajores, Astar Shibuya, Local Network, or Demo Mode).
-- **Switch Network Button**: Non-functional UI button in Header showing informational toast ("Función próximamente - disponible en Milestone 2") preparing for future network switching feature.
-- **Hybrid Architecture**: Current mockWeb3 localStorage simulation maintained for all features with seamless upgrade path to real blockchain contracts in Milestone 2.
-- **Contract Service Layer**: Abstraction in `client/src/config/contracts.ts` with getNetworkConfig() function enabling dynamic mode selection without breaking existing features.
-- **Migration Strategy**: Clear path from localStorage simulation → Celo Alfajores testnet → Celo mainnet with backward compatibility for all Sprint 1-3 features.
+- **Smart Contracts**: Complete VEG21 contract suite ready for deployment:
+  - VEG21Token: ERC20 with minting/burning (18 decimals, 1M initial supply)
+  - VEG21Staking: 10% APR staking rewards system
+  - VEG21Donations: Charity donations with token burning
+  - VEG21Rewards: Challenge completion rewards (+50 VEG21 for 21-day completion)
+  - All contracts use OpenZeppelin libraries with role-based access control
+- **Deployment Infrastructure**: Production-ready deployment system with:
+  - Enhanced scripts/deploy.ts with --dry-run (simulation) and --execute (real deployment) modes
+  - Mainnet safety guards: 10-second abort window, balance checks, gas estimation
+  - scripts/validate_config.sh for environment validation
+  - Private key validation guards preventing deployment without proper credentials
+  - Default demo mode (no blockchain/private key required)
+- **Wallet Integration**: MetaMask connection for real blockchain; demo wallet mode with localStorage simulation; enhanced wallet connection state management.
+- **Mode Indicators**: Visual banners showing current mode:
+  - 🟣 Purple banner: Demo Mode (safe, no transactions)
+  - 🟡 Yellow banner: Testnet Mode (Celo Alfajores, free test CELO)
+  - 🟢 Green banner: Mainnet Mode (Celo, real money)
+- **Hybrid Architecture**: Demo mode localStorage simulation with seamless upgrade path to testnet/mainnet blockchain contracts.
+- **Migration Path**: Clear deployment pathway: Demo (default) → Celo Alfajores (testnet) → Celo Mainnet (production)
+- **Security**: Safe by default - no sensitive data in repository, private key validation, deployment confirmation required, .gitignore protection.
 
 ### State Management
 - **Client-side**: React Query for server state caching, custom hooks for wallet and mobile detection, React Context for shared UI state (toasts, modals).
