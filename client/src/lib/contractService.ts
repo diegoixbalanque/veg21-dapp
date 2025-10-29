@@ -65,6 +65,44 @@ function hasWalletProvider(): boolean {
   return true;
 }
 
+// ⚠️ CRITICAL: Private key validation for backend deployment scripts
+// This is server-side only - NEVER expose private keys in frontend!
+export function hasValidPrivateKey(): boolean {
+  // This check is for Node.js environment only (deployment scripts)
+  if (typeof window !== 'undefined') {
+    console.error('SECURITY WARNING: Never check for PRIVATE_KEY in browser environment!');
+    return false;
+  }
+  
+  const privateKey = process.env.PRIVATE_KEY;
+  const mode = process.env.VITE_VEG21_MODE || 'demo';
+  
+  // Demo mode doesn't need private key
+  if (mode === 'demo' || mode === 'mock') {
+    return false;
+  }
+  
+  // Real modes require private key
+  if (!privateKey || privateKey === '') {
+    console.error('❌ DEPLOYMENT BLOCKED: PRIVATE_KEY not found in .env');
+    console.error('   Required for deploying to blockchain');
+    console.error('   See .env.example for setup instructions');
+    return false;
+  }
+  
+  // Validate private key format (64 hex characters)
+  const hexPattern = /^[0-9a-fA-F]{64}$/;
+  if (!hexPattern.test(privateKey)) {
+    console.error('❌ DEPLOYMENT BLOCKED: Invalid PRIVATE_KEY format');
+    console.error('   Expected: 64 hexadecimal characters (no 0x prefix)');
+    console.error('   Example: abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890');
+    return false;
+  }
+  
+  console.log('✅ Valid PRIVATE_KEY detected for deployment');
+  return true;
+}
+
 // Base contract implementation
 abstract class BaseContract {
   protected address: string;
