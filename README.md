@@ -1,290 +1,157 @@
-# VEG21 – 21 Días de Hábitos Veganos 🌱
+# 🌱 VEG21 – 21-Day Vegan Habits Challenge
 
-**Gamifica tu impacto vegano y dona con ASTR**
+**Gamify your vegan impact and donate transparently on Celo.**
 
-VEG21 es una **dApp experimental** diseñada para motivar a las personas a adoptar hábitos veganos mediante retos, recompensas tokenizadas y donaciones a causas de protección animal y ambiental.  
-El MVP demuestra un flujo funcional que puede integrarse con negocios locales y expandirse a otros proyectos Web3.
+VEG21 is an experimental Web3 dApp designed to motivate people to adopt and maintain vegan habits through gamified challenges, tokenized rewards, and transparent donations to animal and environmental causes.
 
----
-
-## 🎯 Objetivos del proyecto
-
-- **Gamificación de hábitos veganos**: los usuarios participan en retos de 21 días y registran su progreso.  
-- **Integración con ASTR**: simulación de wallets y tokens ASTR para participar en retos y donaciones.  
-- **Fondo comunitario y gobernanza**: los usuarios pueden donar tokens a asociaciones de protección y votar cómo distribuir el fondo.  
-- **Ranking de impacto vegano**: leaderboard que muestra el impacto de cada participante.  
-- **Validación de concepto**: flujo funcional de onboarding, retos, donaciones y ranking, listo para probar con un restaurante vegano.
+Originally presented at the **Cripto Latin Fest Hackathon (Astar Network)**, where it earned **3rd place**, VEG21 is now evolving to the **Celo ecosystem**, aligning with its mission of real-world impact and accessible, regenerative Web3 experiences.
 
 ---
 
-## 💡 Valor agregado
+## 🎯 Project Objectives
 
-- **Integración con un restaurante vegano local**: los clientes pueden recibir tokens ASTR al comprar productos especiales, conectando el consumo real con la plataforma Web3.  
-- **Plataforma replicable y extensible**: puede incorporar otros negocios, proyectos de hábitos saludables o iniciativas comunitarias.  
-- **Permite experimentación en Web3**: onboarding de usuarios no técnicos, gamificación y uso de tokens en un escenario real.  
+* **Gamified vegan habits:** Users participate in 21-day challenges and track their daily progress.
+* **Celo integration:** Functional wallet connection, token simulation, and proof-of-action mechanics.
+* **Community fund & governance:** Users can donate tokens to verified vegan causes and vote on fund distribution.
+* **Vegan Impact Ranking:** A public leaderboard showcasing user achievements and environmental impact.
+* **Concept validation:** Functional flow of onboarding, challenges, donations, and ranking — ready to pilot with vegan restaurants and communities.
 
 ---
 
-## 🚀 Funcionalidades del MVP
+## 💡 Value Proposition
 
-- **Landing Page**
-  - Título y descripción del reto “21 Días de Hábitos Veganos”.  
-  - Botón de conexión de wallet (simulación con ethers.js).  
+* **Real-world connection:** Enables collaboration with vegan restaurants where customers can receive Celo-based rewards for vegan purchases.
+* **Scalable & replicable:** The model can expand to other sustainable lifestyle habits and community-driven initiatives.
+* **Inclusive onboarding:** Introduces non-technical users to blockchain through practical and positive experiences.
 
-- **Retos Activos**
-  - Unirse a un reto y ver progreso.  
-  - Confirmaciones visuales de participación.  
+---
 
-- **Fondo Comunitario VEG21**
-  - 2–3 causas de protección animal (datos de prueba).  
-  - Donaciones con tokens simulados y contador visible.  
+## 🚀 MVP Functionalities
 
-- **Ranking de Impacto Vegano**
-  - Tabla simple con leaderboard de participantes.  
+### 🟢 Onboarding & 21-Day Challenge
+
+* Sign up and start the vegan challenge.
+* Track daily progress with visual confirmations.
+
+### 🟣 Community Fund
+
+* Explore 2–3 vegan/animal protection causes (demo data).
+* Donate tokens (simulated) and view transparent totals.
+
+### 🟢 Vegan Impact Ranking
+
+* Global leaderboard showing participant scores and progress.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React + Vite + TailwindCSS  
-- **Simulación Web3**: ethers.js para conexión de wallet y tokens ASTR  
-- **Hosting del MVP**: [Render Deploy](https://veg21-dapp.onrender.com)  
-- **Extensible a**: smart contracts reales en Astar, staking, NFTs y gobernanza on-chain  
+| Layer                              | Technology                  |
+| ---------------------------------- | --------------------------- |
+| **Frontend**                       | React + Vite + TailwindCSS  |
+| **Web3 Connection**                | Celo Mainnet (Forno RPC)    |
+| **Wallet Integration**             | Celo Connect / useCelo Hook |
+| **Hosting**                        | Replit (MVP Live Demo)      |
+| **Blockchain Framework (planned)** | Hardhat + Solidity          |
+| **Backend (optional)**             | Supabase (for user data)    |
 
 ---
 
-## 📦 Cómo probar el MVP
+## 🌍 Live Deployment
 
-1. Clona este repositorio:
-
-```bash
-git clone https://github.com/diegoixbalanque/veg21-dapp.git
-cd veg21-dapp
-```
-
-2. Instala dependencias:
-
-```bash
-npm install
-```
-
-3. Inicia la aplicación:
-
-```bash
-npm run dev
-```
-
-4. Abre el navegador en http://localhost:5173
-
-También puedes ver la demo en vivo aquí:
-👉 https://veg21-dapp.onrender.com
+🔗 **Live Demo:** [https://veg21.replit.app](#)
+🔗 **GitHub Repository:** [https://github.com/diegoixbalanque/veg21-dapp](#)
 
 ---
 
-## 🏗️ Smart Contract Integration Layer (Sprint 8)
+## ⚙️ Environment Configuration
 
-VEG21 ahora incluye una **capa de integración de contratos inteligentes** que permite alternar entre:
-
-- **Modo Mock** - Funcionalidad blockchain simulada (por defecto)
-- **Modo Contract** - Interacción real con contratos inteligentes en Astar Network
-
-### 🔧 Configuración del Entorno
-
-Por defecto, la dApp funciona en **modo mock** para desarrollo:
+**`.env` Example (Celo Mainnet):**
 
 ```bash
-# Variables de entorno (.env)
-VITE_MOCK_MODE=true          # Usar modo mock (por defecto)
-VITE_ENVIRONMENT=development # Entorno objetivo
+VITE_VEG21_MODE=celo-mainnet
+VITE_DEPLOYER_PUBLIC_ADDRESS=0x8fB54C9698eDfB25Ca8F055554B3A9E06AB75f6C
+PRIVATE_KEY=6395600bdd3a8f6d0b19c3268ca44eee3da41bcf2d6677b5d1bf7292fecd2ae5
+RPC_URL=https://forno.celo.org
+VITE_CELO_MAINNET_RPC_URL=https://forno.celo.org
+CHAIN_ID=42220
+EXPLORER_URL=https://celoscan.io
 ```
 
-#### Entornos Disponibles
+---
 
-- `development` - Desarrollo local con contratos mock
-- `testnet` - Deployment en testnet de Astar  
-- `mainnet` - Deployment en mainnet de Astar
-- `local` - Red local Hardhat
-
-### 🔄 Cambiar Entre Modos
-
-**Modo Mock (Actual)**
-```bash
-VITE_MOCK_MODE=true
-```
-
-**Modo Contract (Para blockchain real)**
-```bash
-VITE_MOCK_MODE=false
-VITE_ENVIRONMENT=testnet
-```
-
-### 📑 Contratos Soportados
-
-La dApp está diseñada para trabajar con estos contratos inteligentes:
-
-1. **VEG21 Token Contract** - Token ERC20 del ecosistema
-2. **Staking Contract** - Staking de tokens con 5% APY
-3. **Donations Contract** - Gestión de contribuciones benéficas  
-4. **Rewards Contract** - Sistema de recompensas por hitos
-
-### 🚀 Deployment Real de Contratos
-
-#### Paso 1: Deployar Contratos
-
-```bash
-# Ejemplo de script de deployment (por crear)
-npx hardhat run scripts/deploy.js --network astar-testnet
-```
-
-#### Paso 2: Actualizar Direcciones
-
-Actualiza la configuración con las direcciones deployadas:
-
-```typescript
-// client/src/config/contracts.ts
-export const ASTAR_TESTNET_CONFIG: ContractConfig = {
-  addresses: {
-    staking: '0xTuDireccionStaking',
-    donations: '0xTuDireccionDonations', 
-    rewards: '0xTuDireccionRewards',
-    token: '0xTuDireccionToken',
-  },
-  // ... resto de configuración
-};
-```
-
-#### Paso 3: Activar Modo Contract
-
-```bash
-VITE_MOCK_MODE=false
-VITE_ENVIRONMENT=testnet
-```
-
-### 📁 Estructura de Archivos
+## 🧱 Project Structure
 
 ```
-client/src/
-├── types/
-│   └── contracts.ts           # Interfaces de contratos
-├── contracts/
-│   ├── StakingContract.json   # ABI de Staking
-│   ├── DonationsContract.json # ABI de Donations  
-│   ├── RewardsContract.json   # ABI de Rewards
-│   └── TokenContract.json     # ABI de Token
-├── config/
-│   └── contracts.ts           # Configuración de red y direcciones
-├── lib/
-│   ├── contractService.ts     # Capa de servicio de contratos
-│   └── mockWeb3.ts           # Servicio Web3 mock (existente)
-└── hooks/
-    └── use-mock-web3.tsx     # Hook mejorado con soporte de contratos
+src/
+├── components/           # UI and interactive components
+├── hooks/                # Wallet and blockchain logic
+├── pages/                # Challenge, leaderboard, community fund
+├── config/               # Environment and network setup
+└── assets/               # Media and icons
 ```
 
-## 🔗 Smart Contracts (Sprint 9)
+---
 
-### Architecture Overview
-VEG21 utiliza un enfoque de **modo híbrido** donde las operaciones de staking utilizan contratos inteligentes reales mientras que otras funciones permanecen en modo mock. Esto permite probar la integración blockchain real para funcionalidad crítica mientras se mantiene la velocidad de desarrollo.
+## 🔄 Roadmap
 
-### Contratos Desplegados
+### ✅ Milestone 1 – MVP Completion
 
-#### Staking Contract (Shibuya Testnet)
-- **Dirección del Contrato**: `0x742d35Cc6634C0532925a3b8D62Ac6E7C99191c7`
-- **Red**: Astar Shibuya Testnet (Chain ID: 0x51)
-- **Funcionalidades**:
-  - Staking de tokens con 3.65% APY
-  - Seguimiento de stakes en tiempo real
-  - Capacidad de unstaking instantáneo
-  - Registro de eventos para todas las operaciones
+* Onboarding & 21-day challenge
+* Community fund (mock donations)
+* Leaderboard
+* Wallet integration (Celo Mainnet simulation)
 
-#### Código Fuente del Contrato
-El contrato de staking incluye:
-- `stake(uint256 amount)` - Apostar tokens VEG21
-- `unstake(uint256 amount)` - Desapostar tokens
-- `getStake(address user)` - Obtener cantidad apostada del usuario
-- `updateRewards()` - Aplicar recompensas de staking (1% diario)
+### 🔜 Milestone 2 – Smart Contract Integration
 
-### Configuración del Modo Híbrido
-```javascript
-const hybridConfig = {
-  useRealStaking: true,     // Usa contrato real en Shibuya
-  useRealDonations: false,  // Modo mock
-  useRealRewards: false,    // Modo mock
-  useRealToken: false       // Modo mock
-};
-```
+* Real ERC-20 VEG21 token
+* Reward distribution for challenge completion
+* Proof-of-action validator flow
 
-### Soporte de Red
-- **Desarrollo**: Astar Shibuya Testnet (0x51) para staking real
-- **Producción**: Astar Network (0x250) para todas las operaciones
-- **Fallback**: Simulación mock cuando MetaMask no está disponible
+### 🔮 Milestone 3 – Expansion & Impact Layer
 
-### ⚠️ Notas Importantes
+* Verified causes & transparent donation registry
+* Staking for community governance
+* Mobile-optimized MiniPay integration
 
-#### Compatibilidad Hacia Atrás
+---
 
-- Todos los componentes UI existentes continúan funcionando sin cambios
-- El modo mock sigue siendo el por defecto para desarrollo
-- No hay cambios que rompan la funcionalidad existente
+## 🧩 Future Integrations
 
-#### Para Deployment en Producción
+* **NFT Achievements:** Reward users for completed challenges.
+* **Impact Metrics:** On-chain proof of vegan actions.
+* **DAO Governance:** Allow the community to vote on donation distributions.
+* **Cross-ecosystem scalability:** Extend model to health, sustainability, and circular economy apps.
 
-Para deployment en producción con contratos reales:
+---
 
-1. ✅ Deployar los cuatro contratos inteligentes
-2. ✅ Actualizar direcciones en la configuración
-3. ✅ Configurar `VITE_MOCK_MODE=false`
-4. 🚧 Implementar lógica de interacción real con contratos
-5. ✅ Probar exhaustivamente en testnet primero
+## 🤝 Community
 
-#### Seguridad
+VEG21 was first presented at the **Cripto Latin Fest (Astar Hackathon)** where it earned **3rd place**.
+The project now continues through the **Celo Proof of Ship #9** initiative, supported by **Celo Colombia Builders**, with the goal of building an open, collaborative, and purpose-driven ecosystem.
 
-- Nunca commitear claves privadas o secretos
-- Validar todas las direcciones de contratos antes del deployment
-- Probar todas las funciones en testnet antes de mainnet
-- Implementar manejo de errores para fallos de contratos
+📢 **Community Channel:** [Celo Colombia Builders – Telegram](https://t.me/celocol)
+🌐 **Proof of Ship Page:** [KarmaHQ – VEG21 Project](https://gap.karmahq.xyz/project/veg21-vegan-challenges-and-tokenized-recipes)
 
-🔗 Smart Contract & Testnet
+---
 
-Actualmente este MVP no requiere aún un contrato on-chain para su funcionamiento inicial.
-El diseño contempla que en la siguiente iteración se desplegará un contrato en Astar testnet encargado de:
+## 🧠 Video References (Astar Hackathon – Historical MVP)
 
-- Distribuir recompensas en ASTR a los usuarios que completen retos.
+🎬 **MVP Video:** [https://www.youtube.com/watch?v=exa3p_RJKLU](https://www.youtube.com/watch?v=exa3p_RJKLU)
+🎬 **Business Model Pitch:** [https://www.youtube.com/watch?v=w-HQ8DC2E9M](https://www.youtube.com/watch?v=w-HQ8DC2E9M)
 
-- Gestionar regalías de recetas tokenizadas.
+---
 
-Dirección de contrato en testnet: Por definir en la próxima versión.
+## 🛡️ Security Notes
 
-☁️ Startale Cloud Services
+* Never commit private keys to the repository.
+* Always verify contract addresses before deployment.
+* Test on Celo Sepolia or Baklava before Mainnet deployment.
 
-Este MVP no utiliza Startale Cloud Services, pero se considera como una opción futura para integrar:
+---
 
-- Gestión de infraestructura on-chain.
+## 📜 License
 
-- Servicios complementarios para gobernanza y escalabilidad.
+Open source under the MIT License.
+Built with purpose and compassion 🌱 — *“From recipes to real-world impact.”*
 
-🔮 Futuras expansiones
-
-- Integración real con ASTR y contratos inteligentes para staking y gobernanza.
-
-- Incorporación de NFTs por participación o hitos alcanzados.
-
-- Integración con otros restaurantes, comunidades y proyectos Web3.
-
-- Gamificación más avanzada: logros, recompensas y eventos temáticos.
-
-🤝 Conexión con la comunidad
-
-Este proyecto sirve como hub experimental donde participantes y negocios locales pueden:
-
-- Probar experiencias Web3 sin necesidad de conocimientos técnicos avanzados.
-
-- Explorar nuevas dinámicas de consumo, impacto social y gamificación.
-
-- Conectar con otros proyectos y validar ideas en un entorno real y seguro.
-
-
-VIDEO MVP:
-https://www.youtube.com/watch?v=exa3p_RJKLU
-
-VIDEO BUSINESS MODEL:
-https://www.youtube.com/watch?v=w-HQ8DC2E9M
