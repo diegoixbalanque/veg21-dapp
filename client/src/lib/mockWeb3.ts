@@ -255,7 +255,7 @@ class MockWeb3Service {
         if (!this.state.isInitialized) {
           // Give new users starting tokens
           this.state.balance.veg21 = 100; // Starting VEG21 tokens
-          this.state.balance.astr = 0.5;  // Starting ASTR for gas
+          this.state.balance.astr = 0.5;  // Starting gas balance (displayed as VEG21 in UI)
           this.state.isInitialized = true;
           this.saveStateToStorage();
         }

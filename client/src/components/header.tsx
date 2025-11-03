@@ -156,7 +156,7 @@ export function Header() {
                       {formatTokenAmount(mockWeb3.balance.veg21, 0)} VEG21
                     </div>
                     <div className="text-xs text-gray-500">
-                      {formatTokenAmount(mockWeb3.balance.astr, 3)} ASTR
+                      {formatTokenAmount(mockWeb3.balance.astr, 3)} VEG21
                     </div>
                   </div>
                   {isDemoMode && (

@@ -633,7 +633,7 @@ export default function Profile() {
                     </div>
                     <div>
                       <span className="font-medium">Red:</span>
-                      <span className="ml-2">Astar Shibuya Testnet</span>
+                      <span className="ml-2">Celo Test / VEG21 Beta</span>
                     </div>
                     <div>
                       <span className="font-medium">Recompensas:</span>
@@ -645,7 +645,7 @@ export default function Profile() {
                     </div>
                   </div>
                   <div className="text-xs text-gray-500">
-                    En modo HYBRID, el staking utiliza contratos inteligentes reales en la testnet de Astar Shibuya,
+                    En modo HYBRID, el staking utiliza contratos inteligentes reales en la red de prueba de Celo,
                     mientras que otras funciones permanecen en modo simulado.
                   </div>
                 </div>

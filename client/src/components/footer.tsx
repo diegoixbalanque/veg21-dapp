@@ -58,7 +58,7 @@ export function Footer() {
         
         <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2024 VEG21. Todos los derechos reservados. | Desarrollado en Astar Network
+            © 2024 VEG21. Todos los derechos reservados. | Desarrollado para Celo Network
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-gray-400 hover:text-veg-primary text-sm transition-colors">Términos</a>
