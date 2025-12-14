@@ -1,0 +1,149 @@
+VEG21 currently has a functional 21-day challenge system, but users report confusion about how challenges start, how progress works, what rewards mean, and how a challenge is considered “completed.”
+
+The goal is NOT to add new features or smart contracts, but to clarify, simplify, and solidify the existing challenge system so it feels complete, meaningful, and usable for non-Web3 users.
+
+Objective
+
+Define and improve the 21-day challenge system so that:
+
+Challenges feel like a complete cycle (start → progress → completion).
+
+Rewards are consistent and understandable.
+
+Users clearly know what to do each day.
+
+Completing a challenge feels emotionally and conceptually “finished”.
+
+The system can later evolve into community-created challenges without refactoring.
+
+Scope (Strictly UX, Copy, and Logic Clarification)
+
+Do NOT:
+
+Add new blockchain logic
+
+Add smart contracts
+
+Add community-created challenges yet
+
+Add OAuth or auth-related work
+
+Focus only on challenge system clarity.
+
+Tasks to Plan
+1. Challenge Definition Cleanup
+
+Review how challenges are currently defined (hardcoded array).
+
+Remove or fix the misleading estimatedReward values.
+
+Standardize all official challenges to a single clear reward:
+
+Completing any 21-day challenge grants 600 VEG21 points, distributed across milestones.
+
+Ensure challenge cards reflect accurate, honest information.
+
+2. Clear “What Happens Next” After Challenge Selection
+
+After a user selects a challenge, add a short confirmation/explanation step:
+
+“Your challenge starts today”
+
+“Do one daily check-in to progress”
+
+“Milestones and rewards:
+
+Day 1: 50 VEG21
+
+Day 7: 100 VEG21
+
+Day 14: 150 VEG21
+
+Day 21: 300 VEG21”
+
+This can be a simple modal or inline message—no new UI complexity required.
+
+3. Daily Progress Context
+
+Improve the challenge tracker messaging so the user always understands:
+
+What day they are on
+
+What they should do today
+
+What the next milestone is
+
+Examples:
+
+Day 1: “Complete your first check-in to earn 50 VEG21”
+
+Day 5: “2 days left until your first milestone”
+
+Day 7: “Milestone unlocked! Claim your reward”
+
+This should be done via copy changes, not new logic.
+
+4. Clarify Daily Tasks
+
+Currently, daily tasks are generic and not challenge-specific.
+
+Do one of the following (choose the simplest):
+
+Rename “Daily Task” → “Daily Inspiration”
+
+Add helper text:
+
+“These are general suggestions to support your vegan habit during the challenge.”
+
+No new task logic needed.
+
+5. Reward Meaning Explanation (First Claim Only)
+
+When the user claims their first milestone reward, show a short explanation:
+
+“VEG21 points represent your progress and impact in the vegan community.
+You earn them by staying consistent with your habits.”
+
+This should only appear once.
+
+6. Clear Challenge Completion State (Day 21)
+
+When the user completes day 21:
+
+Show a simple Challenge Completed message or screen:
+
+Congratulatory text
+
+Total VEG21 earned
+
+Message like:
+
+“You completed a full 21-day habit cycle.”
+
+Add a clear next-step prompt (even if not functional yet):
+
+“You can start another challenge or repeat this one.”
+
+This is conceptual closure, not feature expansion.
+
+Success Criteria
+
+After these changes:
+
+A non-Web3 user can explain how the challenge works in one sentence.
+
+Rewards feel consistent and trustworthy.
+
+Completing a challenge feels like a real accomplishment.
+
+No mismatch between UI promises and actual behavior.
+
+The system feels “finished,” not like a demo loop.
+
+Deliverable
+
+A reviewed and documented challenge flow
+
+Updated copy and minor logic alignment
+
+No new dependencies or architectural changes
