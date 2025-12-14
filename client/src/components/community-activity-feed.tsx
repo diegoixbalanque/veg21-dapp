@@ -278,10 +278,10 @@ export function CommunityActivityFeed({
       <CardContent className="p-0">
         {activities.length === 0 ? (
           <div className="text-center py-8 px-4">
-            <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No hay actividades recientes</p>
-            <p className="text-sm text-gray-400 mt-2">
-              La comunidad está empezando. ¡Sé el primero!
+            <div className="text-4xl mb-3">🌿</div>
+            <p className="text-gray-600 font-medium">¡Todo listo para comenzar!</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Completa un día del desafío, reclama recompensas o comparte contenido para ver tu actividad aquí. ¡Cada pequeño paso cuenta! 🚀
             </p>
           </div>
         ) : (

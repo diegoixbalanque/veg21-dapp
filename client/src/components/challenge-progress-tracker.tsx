@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useMockWeb3 } from "@/hooks/use-mock-web3";
 import { Badge } from "@/components/ui/badge";
 import { formatTokenAmount } from "@/lib/mockWeb3";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import confetti from "canvas-confetti";
 
 interface DayStatus {
   day: number;
@@ -104,8 +106,13 @@ export function ChallengeProgressTracker({
     });
   }, [currentDay, isActive, mockWeb3.rewards]);
   
-  // Handle reward claiming
+  const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
+  
+  // Handle reward claiming with celebration
   const handleClaimReward = async (rewardId: string) => {
+    const milestone = milestones.find(m => m.rewardId === rewardId);
+    const rewardAmount = milestone?.amount || 0;
+    
     setClaimingReward(rewardId);
     try {
       await mockWeb3.claimReward(rewardId);
@@ -115,6 +122,17 @@ export function ChallengeProgressTracker({
           m.rewardId === rewardId ? { ...m, claimed: true } : m
         )
       );
+      
+      // Trigger celebration
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#22c55e', '#16a34a', '#4ade80', '#86efac']
+      });
+      
+      setCelebrationMessage(`¡Felicidades! Has ganado ${rewardAmount} tokens VEG21 🎉`);
+      setTimeout(() => setCelebrationMessage(null), 4000);
     } catch (error) {
       console.error('Failed to claim reward:', error);
     } finally {
@@ -297,9 +315,18 @@ export function ChallengeProgressTracker({
                           <div>
                             <p className="font-bold text-gray-900 text-lg">Día {milestone.day} Completado</p>
                             <p className="text-sm text-gray-700 mb-2">{milestone.description}</p>
-                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300 text-sm font-semibold">
-                              💰 {formatTokenAmount(milestone.amount, 0)} VEG21 tokens
-                            </Badge>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300 text-sm font-semibold cursor-help">
+                                    💰 {formatTokenAmount(milestone.amount, 0)} VEG21 tokens
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Los tokens VEG21 son puntos que ganas por completar desafíos veganos</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                         <div>
@@ -308,25 +335,34 @@ export function ChallengeProgressTracker({
                               ✅ Reclamado
                             </Badge>
                           ) : (
-                            <Button
-                              onClick={() => handleClaimReward(milestone.rewardId)}
-                              disabled={claimingReward === milestone.rewardId || !mockWeb3.isInitialized}
-                              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 px-6 py-3 text-base font-bold"
-                              size="lg"
-                              data-testid={`claim-reward-${milestone.rewardId}`}
-                            >
-                              {claimingReward === milestone.rewardId ? (
-                                <>
-                                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                                  Reclamando...
-                                </>
-                              ) : (
-                                <>
-                                  <Gift className="w-5 h-5 mr-2" />
-                                  🎁 Reclamar Ahora
-                                </>
-                              )}
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    onClick={() => handleClaimReward(milestone.rewardId)}
+                                    disabled={claimingReward === milestone.rewardId || !mockWeb3.isInitialized}
+                                    className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 px-6 py-3 text-base font-bold"
+                                    size="lg"
+                                    data-testid={`claim-reward-${milestone.rewardId}`}
+                                  >
+                                    {claimingReward === milestone.rewardId ? (
+                                      <>
+                                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                        Reclamando...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Gift className="w-5 h-5 mr-2" />
+                                        🎁 Reclamar Ahora
+                                      </>
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Recibe tus tokens ganados por completar este hito</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </div>
                       </div>

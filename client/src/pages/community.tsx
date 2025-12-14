@@ -220,14 +220,16 @@ export default function Community() {
               {posts.length === 0 ? (
                 <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm text-center py-12" data-testid="empty-feed">
                   <CardContent>
-                    <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <div className="text-6xl mb-4">🌱</div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {filter === 'all' ? 'No hay posts aún' : 
-                       filter === 'recipe' ? 'No hay recetas aún' :
-                       filter === 'tip' ? 'No hay consejos aún' : 'No hay experiencias aún'}
+                      {filter === 'all' ? '¡La comunidad te espera! 🎉' : 
+                       filter === 'recipe' ? '¡Comparte tu primera receta vegana! 🥗' :
+                       filter === 'tip' ? '¿Tienes un consejo para compartir? 💡' : '¡Cuéntanos tu experiencia vegana! ⭐'}
                     </h3>
-                    <p className="text-gray-600 mb-6">
-                      ¡Sé el primero en compartir contenido con la comunidad!
+                    <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                      {filter === 'all' ? 'Sé el primero en inspirar a otros compartiendo una receta deliciosa, un consejo útil o tu experiencia vegana.' : 
+                       filter === 'recipe' ? 'Comparte esa receta vegana que tanto te gusta. ¡Tu plato favorito puede inspirar a muchos!' :
+                       filter === 'tip' ? 'Desde tips de nutrición hasta trucos de cocina, tu conocimiento puede ayudar a otros en su viaje vegano.' : 'Tu historia puede motivar a alguien a dar el primer paso hacia un estilo de vida más sostenible.'}
                     </p>
                     <Button
                       onClick={() => setShowRecipeForm(true)}
@@ -235,7 +237,9 @@ export default function Community() {
                       data-testid="button-first-post"
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Crear primer post
+                      {filter === 'all' ? '✨ Crear mi primer post' :
+                       filter === 'recipe' ? '🍳 Compartir receta' :
+                       filter === 'tip' ? '💡 Dar un consejo' : '📝 Contar mi experiencia'}
                     </Button>
                   </CardContent>
                 </Card>
