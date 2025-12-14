@@ -90,8 +90,13 @@ export default function Community() {
   };
 
   const communityStats = communityService.getCommunityStats();
+  
+  // In demo/dev mode, allow access without wallet connection
+  const isDemoMode = import.meta.env.DEV;
+  const canAccessCommunity = isDemoMode || isConnected;
+  const userId = formattedAddress || 'demo_user';
 
-  if (!isConnected) {
+  if (!canAccessCommunity) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
         <Header />
@@ -193,7 +198,7 @@ export default function Community() {
             <CommunityActivityFeed 
               maxHeight="400px" 
               showTitle={true}
-              currentUserId={formattedAddress || undefined}
+              currentUserId={userId}
             />
           </div>
 
@@ -255,7 +260,7 @@ export default function Community() {
                               <span className="font-semibold text-gray-900" data-testid={`author-${post.id}`}>
                                 {post.authorName}
                               </span>
-                              {post.authorId === formattedAddress && (
+                              {post.authorId === userId && (
                                 <Badge variant="outline" className="text-xs">Tú</Badge>
                               )}
                             </div>
@@ -319,7 +324,7 @@ export default function Community() {
                       {/* Post Interactions */}
                       <PostInteractions 
                         post={post} 
-                        currentUserId={formattedAddress || ''}
+                        currentUserId={userId}
                         onInteraction={handleInteraction}
                       />
                     </CardContent>

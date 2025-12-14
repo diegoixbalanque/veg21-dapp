@@ -157,7 +157,7 @@ export function CommunityFund() {
 
       const charity = charityData.find(c => c.id === charityId);
       showMessage('success', '¡Donación Exitosa!', 
-        `Has donado ${formatTokenAmount(donationAmount, 0)} VEG21 tokens a ${charity?.name}. \n\nTransacción: ${formatTxHash(transaction.txHash)}`);
+        `Has donado ${formatTokenAmount(donationAmount, 0)} VEG21 tokens a ${charity?.name}. ¡Gracias por tu generosidad! Tu contribución ayuda directamente a los animales.`);
       
       // Reset custom amount
       setCustomAmount('50');
