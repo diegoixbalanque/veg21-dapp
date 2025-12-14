@@ -1,27 +1,33 @@
-import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink, Coins, Trophy, Home, User, Users, Network } from "lucide-react";
+import { useState } from "react";
+import { Wallet, Leaf, AlertCircle, RefreshCw, ExternalLink, Coins, Trophy, Home, User, Users, Network, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/hooks/use-wallet";
+import { useAuth } from "@/hooks/use-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatTokenAmount } from "@/lib/mockWeb3";
 import { Link, useLocation } from "wouter";
 import { DemoWalletButton } from "@/components/demo-wallet-button";
+import { AuthModal } from "@/components/auth-modal";
 import { DEFAULT_NETWORK } from "@/config/chainConfig";
 import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
-  const { isConnected, isConnecting, connectWallet, disconnectWallet, formattedAddress, error, retryConnection, clearError, mockWeb3, isDemoMode } = useWallet();
+  const { isConnected: isWalletConnected, isConnecting, connectWallet, disconnectWallet, formattedAddress, error, retryConnection, clearError, mockWeb3, isDemoMode } = useWallet();
+  const { isAuthenticated, user, logout, isLoading: authLoading } = useAuth();
   const [location] = useLocation();
   const { toast } = useToast();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<"login" | "register">("login");
 
   const handleWalletClick = async () => {
-    if (isConnected) {
+    if (isWalletConnected) {
       disconnectWallet();
     } else {
       try {
         await connectWallet();
       } catch (error) {
         console.error('Failed to connect wallet:', error);
-        // Error is already handled in useWallet hook with toast
       }
     }
   };
@@ -31,7 +37,6 @@ export function Header() {
   };
 
   const handleSwitchNetwork = () => {
-    // Non-functional for Sprint 4 - will be implemented in Milestone 2
     toast({
       title: "Función próximamente",
       description: "El cambio de red estará disponible en Milestone 2 cuando se desplieguen los contratos en Celo Alfajores.",
@@ -39,10 +44,26 @@ export function Header() {
     });
   };
 
-  // Get network display name based on current mode
+  const openLogin = () => {
+    setAuthModalTab("login");
+    setShowAuthModal(true);
+  };
+
+  const openRegister = () => {
+    setAuthModalTab("register");
+    setShowAuthModal(true);
+  };
+
+  const handleLogout = () => {
+    logout();
+    disconnectWallet();
+    toast({
+      title: "Sesión cerrada",
+      description: "Has cerrado sesión correctamente.",
+    });
+  };
+
   const getNetworkDisplayName = () => {
-    // Always use the network display name from chainConfig
-    // This automatically reflects the current VEG21_MODE setting
     return DEFAULT_NETWORK.displayName;
   };
 
@@ -65,132 +86,105 @@ export function Header() {
               </Link>
             </div>
 
-            {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-1">
               <Link href="/">
-                <Button
-                  variant={location === "/" ? "default" : "ghost"}
-                  className={`${
-                    location === "/" 
-                      ? "bg-veg-primary text-white hover:bg-veg-secondary" 
-                      : "text-gray-700 hover:text-veg-primary"
-                  }`}
-                  data-testid="nav-home"
-                >
+                <Button variant={location === "/" ? "default" : "ghost"} className={`${location === "/" ? "bg-veg-primary text-white hover:bg-veg-secondary" : "text-gray-700 hover:text-veg-primary"}`} data-testid="nav-home">
                   <Home className="w-4 h-4 mr-2" />
                   Inicio
                 </Button>
               </Link>
               <Link href="/leaderboard">
-                <Button
-                  variant={location === "/leaderboard" ? "default" : "ghost"}
-                  className={`${
-                    location === "/leaderboard" 
-                      ? "bg-veg-primary text-white hover:bg-veg-secondary" 
-                      : "text-gray-700 hover:text-veg-primary"
-                  }`}
-                  data-testid="nav-leaderboard"
-                >
+                <Button variant={location === "/leaderboard" ? "default" : "ghost"} className={`${location === "/leaderboard" ? "bg-veg-primary text-white hover:bg-veg-secondary" : "text-gray-700 hover:text-veg-primary"}`} data-testid="nav-leaderboard">
                   <Trophy className="w-4 h-4 mr-2" />
                   Leaderboard
                 </Button>
               </Link>
               <Link href="/profile">
-                <Button
-                  variant={location === "/profile" ? "default" : "ghost"}
-                  className={`${
-                    location === "/profile" 
-                      ? "bg-veg-primary text-white hover:bg-veg-secondary" 
-                      : "text-gray-700 hover:text-veg-primary"
-                  }`}
-                  data-testid="nav-profile"
-                >
+                <Button variant={location === "/profile" ? "default" : "ghost"} className={`${location === "/profile" ? "bg-veg-primary text-white hover:bg-veg-secondary" : "text-gray-700 hover:text-veg-primary"}`} data-testid="nav-profile">
                   <User className="w-4 h-4 mr-2" />
                   Perfil
                 </Button>
               </Link>
               <Link href="/community">
-                <Button
-                  variant={location === "/community" ? "default" : "ghost"}
-                  className={`${
-                    location === "/community" 
-                      ? "bg-veg-primary text-white hover:bg-veg-secondary" 
-                      : "text-gray-700 hover:text-veg-primary"
-                  }`}
-                  data-testid="nav-community"
-                >
+                <Button variant={location === "/community" ? "default" : "ghost"} className={`${location === "/community" ? "bg-veg-primary text-white hover:bg-veg-secondary" : "text-gray-700 hover:text-veg-primary"}`} data-testid="nav-community">
                   <Users className="w-4 h-4 mr-2" />
                   Comunidad
                 </Button>
               </Link>
             </nav>
             
-            <div className="flex items-center space-x-4">
-              {isConnected && (
+            <div className="flex items-center space-x-3">
+              {isWalletConnected && (
                 <>
-                  <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${isDemoMode ? 'bg-purple-50' : 'bg-green-50'}`}>
+                  <div className={`hidden sm:flex items-center space-x-2 px-3 py-1 rounded-full ${isDemoMode ? 'bg-purple-50' : 'bg-green-50'}`}>
                     <div className={`w-2 h-2 rounded-full animate-pulse ${isDemoMode ? 'bg-purple-500' : 'bg-veg-primary'}`}></div>
                     <span className={`text-sm font-medium ${isDemoMode ? 'text-purple-700' : 'text-veg-secondary'}`}>
                       {getNetworkDisplayName()}
                     </span>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSwitchNetwork}
-                    className="border-gray-300 text-gray-700 hover:bg-gray-100"
-                    data-testid="button-switch-network"
-                  >
-                    <Network className="w-4 h-4 mr-2" />
-                    Cambiar Red
-                  </Button>
-                </>
-              )}
-              
-              {/* Token Balance Display */}
-              {isConnected && mockWeb3.isInitialized && (
-                <div className="flex items-center space-x-3 bg-gradient-to-r from-veg-primary/5 to-veg-secondary/5 px-4 py-2 rounded-xl border border-veg-primary/20">
-                  <Coins className="w-4 h-4 text-veg-primary" />
-                  <div className="text-right">
-                    <div className="text-sm font-semibold text-veg-dark">
-                      {formatTokenAmount(mockWeb3.balance.veg21, 0)} VEG21
+                  <div className="hidden lg:flex items-center space-x-3 bg-gradient-to-r from-veg-primary/5 to-veg-secondary/5 px-4 py-2 rounded-xl border border-veg-primary/20">
+                    <Coins className="w-4 h-4 text-veg-primary" />
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-veg-dark">
+                        {formatTokenAmount(mockWeb3.balance.veg21, 0)} VEG21
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {formatTokenAmount(mockWeb3.balance.astr, 3)} VEG21
-                    </div>
-                  </div>
-                  {isDemoMode && (
-                    <div className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
-                      DEMO
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {isConnected ? (
-                <div className={`px-4 py-2 rounded-xl ${isDemoMode ? 'bg-purple-100 border border-purple-200' : 'bg-gray-100'}`}>
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-sm ${isDemoMode ? 'text-purple-700' : 'text-gray-600'}`}>
-                      {formattedAddress}
-                    </span>
                     {isDemoMode && (
-                      <span className="px-2 py-1 bg-purple-600 text-white text-xs font-medium rounded-full">
+                      <div className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
                         DEMO
-                      </span>
+                      </div>
                     )}
                   </div>
-                </div>
+                </>
+              )}
+
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center space-x-2" data-testid="button-user-menu">
+                      <User className="w-4 h-4" />
+                      <span className="hidden sm:inline">{user?.name?.split(' ')[0] || 'Usuario'}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-2 py-1.5">
+                      <p className="text-sm font-medium">{user?.name}</p>
+                      <p className="text-xs text-gray-500">{user?.email}</p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    {!isWalletConnected && (
+                      <>
+                        <DropdownMenuItem onClick={handleWalletClick} data-testid="menu-connect-wallet">
+                          <Wallet className="w-4 h-4 mr-2" />
+                          Conectar Wallet
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    {isWalletConnected && (
+                      <>
+                        <DropdownMenuItem className="text-xs text-gray-500">
+                          <Wallet className="w-4 h-4 mr-2" />
+                          {formattedAddress}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuItem onClick={handleLogout} className="text-red-600" data-testid="menu-logout">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Cerrar Sesión
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <div className="flex items-center space-x-3">
-                  <DemoWalletButton />
-                  <Button 
-                    onClick={handleWalletClick}
-                    disabled={isConnecting}
-                    className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-                    data-testid="button-connect-wallet"
-                  >
-                    <Wallet className="mr-2 h-4 w-4" />
-                    {isConnecting ? 'Conectando...' : 'Conectar Wallet'}
+                <div className="flex items-center space-x-2">
+                  {!isWalletConnected && <DemoWalletButton />}
+                  <Button variant="outline" onClick={openLogin} data-testid="button-login">
+                    <LogIn className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Iniciar Sesión</span>
+                  </Button>
+                  <Button onClick={openRegister} className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary" data-testid="button-register">
+                    Registrarse
                   </Button>
                 </div>
               )}
@@ -199,45 +193,23 @@ export function Header() {
         </div>
       </header>
       
-      {/* Wallet Error Banner */}
       {error && (
         <div className="bg-red-50 border-b border-red-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <Alert className="border-0 bg-transparent p-0">
               <AlertCircle className="h-5 w-5 text-red-500" />
-              <AlertTitle className="text-red-800 text-sm font-medium mb-1">
-                Error de Wallet
-              </AlertTitle>
+              <AlertTitle className="text-red-800 text-sm font-medium mb-1">Error de Wallet</AlertTitle>
               <AlertDescription className="text-red-700 text-sm flex items-center justify-between">
                 <span>{error.message}</span>
                 <div className="flex items-center space-x-2 ml-4">
                   {error.type === 'installation_required' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleRetryClick}
-                      className="text-red-700 border-red-300 hover:bg-red-100"
-                      data-testid="button-install-metamask"
-                    >
+                    <Button size="sm" variant="outline" onClick={handleRetryClick} className="text-red-700 border-red-300 hover:bg-red-100">
                       <ExternalLink className="h-3 w-3 mr-1" />
                       Instalar MetaMask
                     </Button>
                   )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={error.type !== 'installation_required' ? handleRetryClick : clearError}
-                    className="text-red-700 border-red-300 hover:bg-red-100"
-                    data-testid="button-retry-wallet"
-                  >
-                    {error.type === 'installation_required' ? (
-                      'Cerrar'
-                    ) : (
-                      <>
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Reintentar
-                      </>
-                    )}
+                  <Button size="sm" variant="outline" onClick={error.type !== 'installation_required' ? handleRetryClick : clearError} className="text-red-700 border-red-300 hover:bg-red-100">
+                    {error.type === 'installation_required' ? 'Cerrar' : <><RefreshCw className="h-3 w-3 mr-1" />Reintentar</>}
                   </Button>
                 </div>
               </AlertDescription>
@@ -245,6 +217,8 @@ export function Header() {
           </div>
         </div>
       )}
+
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} defaultTab={authModalTab} />
     </div>
   );
 }
