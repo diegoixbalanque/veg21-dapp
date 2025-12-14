@@ -19,11 +19,26 @@ Preferred communication style: Simple, everyday language.
 - **Visuals**: Crown/medal icons for leaderboard, custom avatars, progress bars, milestone badges, camera icons for proof uploads.
 
 ### Feature Specifications
-- **Leaderboard System**: Global ranking based on VEG21 tokens earned, donations, and staking rewards; community impact metrics dashboard; localStorage persistence.
-- **User Profile & Onboarding**: Multi-step onboarding with challenge selection (meat-free, vegan breakfasts, full vegan, zero waste); editable user profiles with challenge progress, personal statistics, and gamification elements (badges); localStorage persistence.
-- **Community Feed & Recipe Sharing**: Multi-type content system (recipes, tips, experiences) with forms; engagement features (likes, comments); content filtering; real-time community statistics; localStorage persistence.
-- **Enhanced Onboarding & Challenge Flow**: User registration, daily check-ins with photo/video proof upload (mock), community validation for check-ins, automatic 21-day challenge completion detection with +50 VEG21 bonus, leaderboard integration; localStorage persistence.
-- **Token Simulation & Transaction System**: Comprehensive transaction history (claims, transfers, donations, staking); peer-to-peer VEG21 token transfers with balance validation; community activity feed displaying real-time token events; localStorage persistence for transactions.
+- **Authentication System**: Email/password authentication with JWT tokens; PostgreSQL user storage; bcrypt password hashing; optional wallet linking; session persistence via localStorage token.
+- **Leaderboard System**: Global ranking based on VEG21 tokens earned, donations, and staking rewards; community impact metrics dashboard.
+- **User Profile & Onboarding**: Multi-step onboarding with challenge selection (meat-free, vegan breakfasts, full vegan, zero waste); editable user profiles with challenge progress, personal statistics, and gamification elements (badges).
+- **Community Feed & Recipe Sharing**: Multi-type content system (recipes, tips, experiences) with forms; engagement features (likes, comments); content filtering; real-time community statistics.
+- **Enhanced Onboarding & Challenge Flow**: User registration, daily check-ins with photo/video proof upload (mock), community validation for check-ins, automatic 21-day challenge completion detection with +50 VEG21 bonus, leaderboard integration.
+- **Token Simulation & Transaction System**: Comprehensive transaction history (claims, transfers, donations, staking); peer-to-peer VEG21 token transfers with balance validation; community activity feed displaying real-time token events.
+
+### Authentication Architecture
+- **Backend Routes**: 
+  - POST /api/auth/register - Create account with email/password
+  - POST /api/auth/login - Authenticate and receive JWT
+  - GET /api/auth/me - Get current user (requires Bearer token)
+  - PATCH /api/auth/me - Update user profile
+  - POST /api/auth/link-wallet - Link MetaMask wallet to account
+- **Frontend Components**:
+  - AuthProvider context wrapping entire app
+  - useAuth hook for authentication state
+  - AuthModal with login/register tabs
+  - User dropdown menu in header when authenticated
+- **Security**: bcrypt password hashing, JWT tokens (7-day expiry), optional wallet connection (not required for platform use)
 
 ### Blockchain and Web3 Integration (Mainnet Ready)
 - **Multi-Network Support**: Full configuration for Celo Alfajores testnet (chainId 44787), Celo Mainnet (chainId 42220), Astar Shibuya (chainId 81), local Hardhat (chainId 31337), and Demo mode with environment-based switching via VEG21_MODE variable.
