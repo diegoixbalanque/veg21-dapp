@@ -6,7 +6,7 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
+  passwordHash: text("password_hash"),
   name: text("name").notNull(),
   location: text("location"),
   dietaryPreference: text("dietary_preference"),
@@ -17,6 +17,9 @@ export const users = pgTable("users", {
   totalTokens: integer("total_tokens").default(100),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
+  googleId: text("google_id"),
+  facebookId: text("facebook_id"),
+  authProvider: text("auth_provider").default("email"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
