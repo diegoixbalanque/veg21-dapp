@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Leaf, Mail, Lock, User, MapPin, Loader2 } from "lucide-react";
+import { SiGoogle, SiFacebook } from "react-icons/si";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -118,6 +119,40 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
           </TabsList>
 
           <TabsContent value="login" className="space-y-4 mt-4">
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => window.location.href = '/api/auth/google'}
+                data-testid="button-google-login"
+              >
+                <SiGoogle className="mr-2 h-4 w-4 text-red-500" />
+                Continuar con Google
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => window.location.href = '/api/auth/facebook'}
+                data-testid="button-facebook-login"
+              >
+                <SiFacebook className="mr-2 h-4 w-4 text-blue-600" />
+                Continuar con Facebook
+              </Button>
+            </div>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  O continúa con email
+                </span>
+              </div>
+            </div>
+
             <form onSubmit={handleLogin} className="space-y-4">
               {errors.general && (
                 <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg" data-testid="error-general">
@@ -171,6 +206,40 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
           </TabsContent>
 
           <TabsContent value="register" className="space-y-4 mt-4">
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => window.location.href = '/api/auth/google'}
+                data-testid="button-google-register"
+              >
+                <SiGoogle className="mr-2 h-4 w-4 text-red-500" />
+                Continuar con Google
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => window.location.href = '/api/auth/facebook'}
+                data-testid="button-facebook-register"
+              >
+                <SiFacebook className="mr-2 h-4 w-4 text-blue-600" />
+                Continuar con Facebook
+              </Button>
+            </div>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  O regístrate con email
+                </span>
+              </div>
+            </div>
+
             <form onSubmit={handleRegister} className="space-y-4">
               {errors.general && (
                 <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg" data-testid="error-register-general">

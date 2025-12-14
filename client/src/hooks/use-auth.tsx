@@ -39,6 +39,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenFromUrl = urlParams.get('token');
+    const authError = urlParams.get('auth_error');
+    
+    if (tokenFromUrl) {
+      import("@/lib/auth").then(({ setStoredToken }) => {
+        setStoredToken(tokenFromUrl);
+        window.history.replaceState({}, '', window.location.pathname);
+        refreshUser().finally(() => setIsLoading(false));
+      });
+      return;
+    }
+    
+    if (authError) {
+      window.history.replaceState({}, '', window.location.pathname);
+      console.error("OAuth error:", authError);
+    }
+    
     const token = getStoredToken();
     if (token) {
       refreshUser().finally(() => setIsLoading(false));
