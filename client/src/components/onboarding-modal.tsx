@@ -14,8 +14,15 @@ export interface Challenge {
   description: string;
   icon: React.ReactNode;
   difficulty: 'Principiante' | 'Intermedio' | 'Avanzado';
-  estimatedReward: number;
 }
+
+export const STANDARD_REWARD_TOTAL = 600;
+export const MILESTONE_REWARDS = [
+  { day: 1, amount: 50, description: 'Primer día completado' },
+  { day: 7, amount: 100, description: 'Primera semana completada' },
+  { day: 14, amount: 150, description: 'Dos semanas completadas' },
+  { day: 21, amount: 300, description: 'Desafío completado' },
+];
 
 export interface UserRegistrationData {
   name: string;
@@ -30,32 +37,28 @@ const AVAILABLE_CHALLENGES: Challenge[] = [
     title: '21 días sin carne',
     description: 'Elimina toda la carne de tu dieta por 21 días. Incluye pollo, res, cerdo y pescado.',
     icon: <Leaf className="w-6 h-6" />,
-    difficulty: 'Principiante',
-    estimatedReward: 500
+    difficulty: 'Principiante'
   },
   {
     id: 'vegan_breakfasts_21',
     title: '21 días de desayunos veganos',
     description: 'Comienza tu día con desayunos 100% veganos. Perfecto para principiantes.',
     icon: <Coffee className="w-6 h-6" />,
-    difficulty: 'Principiante',
-    estimatedReward: 300
+    difficulty: 'Principiante'
   },
   {
     id: 'full_vegan_21',
     title: '21 días completamente vegano',
     description: 'Adopta una dieta 100% vegana: sin carne, lácteos, huevos ni miel.',
     icon: <Heart className="w-6 h-6" />,
-    difficulty: 'Intermedio',
-    estimatedReward: 800
+    difficulty: 'Intermedio'
   },
   {
     id: 'zero_waste_vegan_21',
     title: '21 días vegano zero waste',
     description: 'Combina veganismo con zero waste. Reduce empaques y desperdicio.',
     icon: <Utensils className="w-6 h-6" />,
-    difficulty: 'Avanzado',
-    estimatedReward: 1000
+    difficulty: 'Avanzado'
   }
 ];
 
@@ -69,7 +72,7 @@ interface OnboardingModalProps {
 }
 
 export function OnboardingModal({ isOpen, onChallengeSelect }: OnboardingModalProps) {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationData, setRegistrationData] = useState<UserRegistrationData>({
@@ -183,12 +186,14 @@ export function OnboardingModal({ isOpen, onChallengeSelect }: OnboardingModalPr
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="modal-onboarding">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center text-veg-primary">
-            {step === 1 ? '¡Bienvenido a VEG21! 🌱' : 'Elige tu Desafío'}
+            {step === 1 ? '¡Bienvenido a VEG21! 🌱' : step === 2 ? 'Elige tu Desafío' : '¡Listo para comenzar!'}
           </DialogTitle>
           <DialogDescription className="text-center text-lg text-gray-600">
             {step === 1 
               ? 'Completa tu registro para comenzar tu transformación vegana'
-              : 'Selecciona tu desafío de 21 días'}
+              : step === 2 
+              ? 'Selecciona tu desafío de 21 días' 
+              : 'Revisa los detalles de tu desafío'}
           </DialogDescription>
         </DialogHeader>
         
@@ -359,7 +364,7 @@ export function OnboardingModal({ isOpen, onChallengeSelect }: OnboardingModalPr
                           {challenge.difficulty}
                         </Badge>
                         <div className="text-sm text-gray-600">
-                          Hasta <span className="font-semibold text-veg-primary">{challenge.estimatedReward} VEG21</span>
+                          <span className="font-semibold text-veg-primary">{STANDARD_REWARD_TOTAL} VEG21</span>
                         </div>
                       </div>
                     </CardHeader>
@@ -383,7 +388,7 @@ export function OnboardingModal({ isOpen, onChallengeSelect }: OnboardingModalPr
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-600">
                       <span className="font-medium">Duración:</span> 21 días • 
-                      <span className="font-medium"> Recompensa:</span> Hasta {selectedChallenge.estimatedReward} VEG21
+                      <span className="font-medium"> Recompensa:</span> {STANDARD_REWARD_TOTAL} VEG21
                     </div>
                   </div>
                 </div>
@@ -391,12 +396,84 @@ export function OnboardingModal({ isOpen, onChallengeSelect }: OnboardingModalPr
               
               <div className="flex justify-center pt-4">
                 <Button
+                  onClick={() => setStep(3)}
+                  disabled={!selectedChallenge}
+                  className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary px-8 py-3 text-lg"
+                  data-testid="button-continue-to-confirmation"
+                >
+                  Continuar
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {step === 3 && selectedChallenge && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep(2)}
+                  className="text-gray-600 hover:text-veg-primary"
+                  data-testid="button-back-to-challenges"
+                >
+                  <ArrowLeft className="mr-2 w-4 h-4" />
+                  Volver
+                </Button>
+              </div>
+
+              <div className="text-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-veg-primary to-veg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-veg-dark mb-2">
+                  ¡Tu desafío comienza hoy!
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  {selectedChallenge.title}
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <h4 className="font-semibold text-veg-dark mb-4 text-center">
+                  Así funcionan tus recompensas:
+                </h4>
+                <div className="space-y-3">
+                  {MILESTONE_REWARDS.map((milestone, index) => (
+                    <div key={milestone.day} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-veg-primary/20 rounded-full flex items-center justify-center text-veg-primary font-bold text-sm">
+                          {milestone.day}
+                        </div>
+                        <span className="text-gray-700">{milestone.description}</span>
+                      </div>
+                      <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                        +{milestone.amount} VEG21
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                  <span className="font-semibold text-gray-900">Total al completar:</span>
+                  <span className="text-xl font-bold text-veg-primary">{STANDARD_REWARD_TOTAL} VEG21</span>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-800 text-center">
+                  <strong>¿Cómo avanzar?</strong> Haz un check-in diario para registrar tu progreso. 
+                  ¡Cada día cuenta!
+                </p>
+              </div>
+              
+              <div className="flex justify-center pt-4">
+                <Button
                   onClick={handleConfirmChallenge}
-                  disabled={!selectedChallenge || isSubmitting}
+                  disabled={isSubmitting}
                   className="bg-gradient-to-r from-veg-primary to-veg-secondary text-white hover:from-veg-secondary hover:to-veg-primary px-8 py-3 text-lg"
                   data-testid="button-start-challenge"
                 >
-                  {isSubmitting ? 'Guardando...' : 'Comenzar mi desafío 🚀'}
+                  {isSubmitting ? 'Guardando...' : '¡Comenzar ahora! 🚀'}
                 </Button>
               </div>
             </div>
