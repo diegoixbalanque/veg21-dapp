@@ -3,6 +3,99 @@
 ## Overview
 VEG21 is a blockchain-based web application designed to promote and gamify vegan lifestyle adoption through 21-day challenges. It integrates habit tracking, social impact, and cryptocurrency rewards (VEG21 tokens) to create an engaging ecosystem. The platform enables users to participate in vegan challenges, contribute to community causes, and earn rewards, fostering environmental sustainability and a growing vegan community. Key features include a global impact leaderboard, user profiles, onboarding flows, community feed with recipe sharing, daily check-ins with proof upload, and a token simulation layer with transaction tracking, all preparing for Celo Testnet integration.
 
+---
+
+## How the 21-Day Challenge Works
+
+The core feature of VEG21 is a gamified 21-day vegan challenge designed to help users build sustainable habits.
+
+### The Journey
+1. **Choose Your Challenge** - Pick from 4 difficulty levels:
+   - *21 días sin carne* (Beginner) - No meat for 21 days
+   - *21 días de desayunos veganos* (Beginner) - Vegan breakfasts only
+   - *21 días completamente vegano* (Intermediate) - Fully vegan diet
+   - *21 días vegano zero waste* (Advanced) - Vegan + zero waste
+
+2. **Earn Rewards at Milestones** - Total: 600 VEG21 tokens
+   | Day | Reward | Description |
+   |-----|--------|-------------|
+   | 1   | 50 VEG21 | First day completed |
+   | 7   | 100 VEG21 | First week completed |
+   | 14  | 150 VEG21 | Two weeks completed |
+   | 21  | 300 VEG21 | Challenge completed! |
+
+3. **Daily Progress** - Each day shows:
+   - "Inspiración Diaria" - A daily vegan tip or activity suggestion
+   - Contextual message showing days until next milestone
+   - Visual progress bar and day tracker
+
+4. **Claim Rewards** - When you reach a milestone, a reward button appears. Click to claim your VEG21 tokens.
+
+5. **Completion Celebration** - On Day 21, you see a trophy celebration with your total earned tokens and option to start a new challenge.
+
+---
+
+## Demo Mode vs Wallet Mode
+
+VEG21 supports two modes to accommodate all users:
+
+### Demo Mode (Default)
+- **What it is**: A safe sandbox to explore all features without any real blockchain interaction
+- **How to activate**: Click "Usar Wallet de Prueba" (Use Test Wallet) in the header
+- **Visual indicator**: Purple banner showing "Demo Mode — No On-Chain Transactions"
+- **What works**: All features function normally - challenges, rewards, donations, staking, leaderboard
+- **Data storage**: Everything saved to browser localStorage
+- **Best for**: First-time users, judges evaluating the app, development testing
+
+### Wallet Mode (MetaMask)
+- **What it is**: Real blockchain connection for actual token transactions
+- **How to activate**: Click "Conectar" and approve MetaMask connection
+- **Visual indicators**:
+  - Yellow banner = Testnet (Celo Alfajores - free test tokens)
+  - Green banner = Mainnet (Celo - real money)
+- **Requirements**: MetaMask browser extension, network configured
+- **Best for**: Production use once smart contracts are deployed
+
+---
+
+## What is Mocked or Simulated
+
+For judges and collaborators: the following features are intentionally simulated for demonstration purposes.
+
+### Currently Simulated (localStorage-based)
+| Feature | What's Simulated | Production Path |
+|---------|------------------|-----------------|
+| **VEG21 Token Balance** | Stored in localStorage, no real tokens | Deploy VEG21Token.sol to Celo |
+| **Reward Claims** | Milestone rewards added to localStorage balance | VEG21Rewards.sol contract |
+| **Staking** | 10% APR calculated locally | VEG21Staking.sol contract |
+| **Donations** | Token deductions from localStorage | VEG21Donations.sol contract |
+| **Transfers** | Peer-to-peer transfers in localStorage | ERC20 transfer function |
+| **Transaction History** | Events logged to localStorage | On-chain event logs |
+| **Demo Wallet** | Fixed address: 0xDEMO...1234 | Real MetaMask address |
+
+### Fully Functional (Real Implementation)
+| Feature | Implementation |
+|---------|----------------|
+| **User Authentication** | Real PostgreSQL database, JWT tokens, bcrypt hashing |
+| **User Profiles** | Persisted to PostgreSQL |
+| **Community Posts** | Stored in PostgreSQL with likes/comments |
+| **Challenge Progress** | Tracked in localStorage (upgradable to DB) |
+| **Leaderboard** | Aggregates from user data |
+| **UI/UX Flow** | Complete production-ready interface |
+
+### Smart Contracts (Ready for Deployment)
+Located in `/contracts/`:
+- `VEG21Token.sol` - ERC20 token with mint/burn
+- `VEG21Staking.sol` - Staking with 10% APR rewards
+- `VEG21Donations.sol` - Charity donations with token burning
+- `VEG21Rewards.sol` - Challenge completion reward distribution
+
+Deployment scripts in `/scripts/deploy.ts` support:
+- `--dry-run` - Simulate deployment without executing
+- `--execute` - Real deployment to configured network
+
+---
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
