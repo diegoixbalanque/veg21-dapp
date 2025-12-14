@@ -1,5 +1,8 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as FacebookStrategy } from "passport-facebook";
 import { storage, toSafeUser } from "./storage";
 import { hashPassword, verifyPassword, generateToken, verifyToken, extractTokenFromHeader } from "./auth";
 import { insertUserSchema, loginSchema } from "@shared/schema";
@@ -92,6 +95,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Email o contraseña incorrectos" });
       }
       
+      if (!user.passwordHash) {
+        return res.status(401).json({ error: "Esta cuenta usa inicio de sesión social. Usa Google o Facebook para entrar." });
+      }
+      
       const isValid = await verifyPassword(validatedData.password, user.passwordHash);
       if (!isValid) {
         return res.status(401).json({ error: "Email o contraseña incorrectos" });
@@ -168,6 +175,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Error al vincular wallet" });
     }
   });
+
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+    : 'http://localhost:5000';
+
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: `${baseUrl}/api/auth/google/callback`,
+    }, async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails?.[0]?.value;
+        if (!email) {
+          return done(new Error("No email found in Google profile"), undefined);
+        }
+
+        let user = await storage.getUserByGoogleId(profile.id);
+        
+        if (!user) {
+          const existingUser = await storage.getUserByEmail(email);
+          if (existingUser) {
+            user = await storage.linkOAuthProvider(existingUser.id, 'google', profile.id);
+          } else {
+            user = await storage.createOAuthUser({
+              email,
+              name: profile.displayName || email.split('@')[0],
+              googleId: profile.id,
+              authProvider: 'google',
+            });
+          }
+        }
+
+        done(null, user);
+      } catch (error) {
+        done(error as Error, undefined);
+      }
+    }));
+
+    app.get("/api/auth/google", passport.authenticate('google', { 
+      scope: ['profile', 'email'],
+      session: false 
+    }));
+
+    app.get("/api/auth/google/callback", 
+      passport.authenticate('google', { session: false, failureRedirect: '/?auth_error=google_failed' }),
+      (req, res) => {
+        const user = req.user as any;
+        if (user) {
+          const token = generateToken(user);
+          res.redirect(`/?token=${token}`);
+        } else {
+          res.redirect('/?auth_error=no_user');
+        }
+      }
+    );
+  }
+
+  if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+    passport.use(new FacebookStrategy({
+      clientID: process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      callbackURL: `${baseUrl}/api/auth/facebook/callback`,
+      profileFields: ['id', 'emails', 'name', 'displayName'],
+    }, async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails?.[0]?.value;
+        if (!email) {
+          return done(new Error("No email found in Facebook profile"), undefined);
+        }
+
+        let user = await storage.getUserByFacebookId(profile.id);
+        
+        if (!user) {
+          const existingUser = await storage.getUserByEmail(email);
+          if (existingUser) {
+            user = await storage.linkOAuthProvider(existingUser.id, 'facebook', profile.id);
+          } else {
+            user = await storage.createOAuthUser({
+              email,
+              name: profile.displayName || `${profile.name?.givenName || ''} ${profile.name?.familyName || ''}`.trim() || email.split('@')[0],
+              facebookId: profile.id,
+              authProvider: 'facebook',
+            });
+          }
+        }
+
+        done(null, user);
+      } catch (error) {
+        done(error as Error, undefined);
+      }
+    }));
+
+    app.get("/api/auth/facebook", passport.authenticate('facebook', { 
+      scope: ['email'],
+      session: false 
+    }));
+
+    app.get("/api/auth/facebook/callback", 
+      passport.authenticate('facebook', { session: false, failureRedirect: '/?auth_error=facebook_failed' }),
+      (req, res) => {
+        const user = req.user as any;
+        if (user) {
+          const token = generateToken(user);
+          res.redirect(`/?token=${token}`);
+        } else {
+          res.redirect('/?auth_error=no_user');
+        }
+      }
+    );
+  }
+
+  app.use(passport.initialize());
 
   const httpServer = createServer(app);
   return httpServer;
