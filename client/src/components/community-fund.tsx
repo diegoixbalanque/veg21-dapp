@@ -124,8 +124,10 @@ export function CommunityFund() {
     // In development mode with mock Web3, we only need mockWeb3 to be initialized
     const canDonate = import.meta.env.DEV ? mockWeb3.isInitialized : (isConnected && mockWeb3.isInitialized);
     
-    if (!canDonate) {
-      showMessage('error', 'Wallet Requerida', 'Necesitas conectar tu wallet antes de hacer una donación.');
+    // Check localStorage fallback for demo mode (handles state sync race condition)
+    const isDemoActive = localStorage.getItem('veg21_demo') === 'true';
+    if (!canDonate && !isDemoActive) {
+      showMessage('error', 'Conecta tu Wallet', 'Para donar, primero conecta tu wallet desde la barra superior, o usa "Modo Demo" para probar.');
       return;
     }
 
@@ -169,8 +171,10 @@ export function CommunityFund() {
   };
 
   const handleVote = async (charityId: number) => {
-    if (!isConnected) {
-      showMessage('error', 'Wallet Requerida', 'Necesitas conectar tu wallet antes de votar.');
+    // Check localStorage fallback for demo mode (handles state sync race condition)
+    const isDemoActive = localStorage.getItem('veg21_demo') === 'true';
+    if (!isConnected && !isDemoActive) {
+      showMessage('error', 'Conecta tu Wallet', 'Para votar, primero conecta tu wallet desde la barra superior.');
       return;
     }
 

@@ -71,15 +71,17 @@ export function ActiveChallenges() {
     message: string;
   }>({ isOpen: false, type: 'success', title: '', message: '' });
 
-  const { isConnected } = useWallet();
+  const { isConnected, connectDemo } = useWallet();
 
   const showMessage = (type: 'success' | 'error', title: string, message: string) => {
     setModalState({ isOpen: true, type, title, message });
   };
 
   const handleJoinChallenge = async (challenge: Challenge) => {
-    if (!isConnected) {
-      showMessage('error', 'Wallet Requerida', 'Necesitas conectar tu wallet antes de unirte a un reto.');
+    // Check both hook state AND localStorage for demo mode (handles state sync race condition)
+    const isDemoActive = localStorage.getItem('veg21_demo') === 'true';
+    if (!isConnected && !isDemoActive) {
+      showMessage('error', 'Conecta tu Wallet', 'Para unirte al reto, primero conecta tu wallet haciendo clic en "Conectar" en la barra superior, o usa el botón "Modo Demo" para probar sin wallet.');
       return;
     }
 
