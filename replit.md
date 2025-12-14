@@ -24,6 +24,13 @@ Preferred communication style: Simple, everyday language.
 - **User Profile & Onboarding**: Multi-step onboarding with challenge selection (meat-free, vegan breakfasts, full vegan, zero waste); editable user profiles with challenge progress, personal statistics, and gamification elements (badges).
 - **Community Feed & Recipe Sharing**: Multi-type content system (recipes, tips, experiences) with forms; engagement features (likes, comments); content filtering; real-time community statistics.
 - **Enhanced Onboarding & Challenge Flow**: User registration, daily check-ins with photo/video proof upload (mock), community validation for check-ins, automatic 21-day challenge completion detection with +50 VEG21 bonus, leaderboard integration.
+- **Challenge UX Clarity System**: 
+  - Standardized 600 VEG21 reward total distributed across milestones (Day 1: 50, Day 7: 100, Day 14: 150, Day 21: 300)
+  - Post-selection confirmation step with milestone breakdown
+  - Contextual progress messages ("X días para tu próximo hito", "¡Hito desbloqueado!")
+  - "Inspiración Diaria" daily suggestions with helper text
+  - First-time reward explanation (one-time localStorage-tracked message)
+  - Day 21 completion celebration with trophy, total earned, and "Start another challenge" prompt
 - **Token Simulation & Transaction System**: Comprehensive transaction history (claims, transfers, donations, staking); peer-to-peer VEG21 token transfers with balance validation; community activity feed displaying real-time token events.
 
 ### Authentication Architecture
